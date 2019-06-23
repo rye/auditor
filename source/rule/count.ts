@@ -1,7 +1,7 @@
 import { logger } from "../logging";
 import assert from "assert";
 
-import { CountSolution } from "../solution";
+import { CountSolution, Solution } from "../solution";
 import { RequirementContext } from "../requirement";
 import { CourseRule } from "./course";
 import { Rule } from "./interface";
@@ -11,7 +11,7 @@ import { sortBy } from "lodash";
 import cartesian from "fast-cartesian";
 import combinations from "combinations-generator";
 
-export class CountRule {
+export class CountRule implements Rule {
 	readonly count: number;
 	readonly items: ReadonlyArray<Rule>;
 
@@ -20,7 +20,7 @@ export class CountRule {
 		this.items = items;
 	}
 
-	state() {
+	state(): "rule" {
 		return "rule";
 	}
 
@@ -28,7 +28,7 @@ export class CountRule {
 		return [];
 	}
 
-	rank() {
+	rank(): 0 {
 		return 0;
 	}
 
@@ -106,7 +106,13 @@ export class CountRule {
 		}
 	}
 
-	*solutions({ ctx, path }: { ctx: RequirementContext; path: string[] }) {
+	*solutions({
+		ctx,
+		path,
+	}: {
+		ctx: RequirementContext;
+		path: string[];
+	}): IterableIterator<Solution> {
 		path = [...path, ".of"];
 		logger.debug(path);
 
@@ -210,7 +216,7 @@ export class CountRule {
 		}
 	}
 
-	estimate(ctx: RequirementContext) {
+	estimate({ ctx }: { ctx: RequirementContext }) {
 		let lo = this.count;
 		let hi = this.items.length + 1;
 

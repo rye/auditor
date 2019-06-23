@@ -1,64 +1,46 @@
-from __future__ import annotations
-from dataclasses import dataclass
-from typing import Union, List, Tuple, TYPE_CHECKING
-import itertools
-import logging
+import { CountRule, Rule } from "../rule";
+import { Result, CountResult } from "../result";
+import { RequirementContext } from "../requirement";
+import { Solution } from "./interface";
+import { enumerate } from "../lib";
 
-if TYPE_CHECKING:
-    from ..rule import CountRule, Rule
-    from ..result import Result
-    from ..requirement import RequirementContext
-    from . import Solution
+export class CountSolution implements Solution {
+	readonly count: number;
+	readonly items: ReadonlyArray<Solution | Rule>;
 
-from ..result import CountResult
+	state(): "solution" {
+		return "solution";
+	}
 
-logger = logging.getLogger(__name__)
+	claims() {
+		return [];
+	}
 
+	rank(): 0 {
+		return 0;
+	}
 
-@dataclass(frozen=True)
-class CountSolution:
-    count: int
-    items: Tuple[Union[Solution, Rule]]
+	ok() {
+		return false;
+	}
 
-    def to_dict(self):
-        return {
-            "type": "count",
-            "state": self.state(),
-            "count": self.count,
-            "items": [item.to_dict() for item in self.items],
-            "status": "pending",
-            "ok": self.ok(),
-            "rank": self.rank(),
-            "claims": [item for item in self.claims()],
-        }
+	constructor(args: {
+		rule: CountRule;
+		items: ReadonlyArray<Solution | Rule>;
+	}) {
+		this.count = args.rule.count;
+		this.items = args.items;
+	}
 
-    def state(self):
-        return "solution"
+	audit({ ctx, path }: { ctx: RequirementContext; path: string[] }): Result {
+		path = [...path, ".of"];
 
-    def claims(self):
-        return []
+		let results = [...enumerate(this.items)].map(([i, r]) =>
+			r.state() == "solution" ? r.audit({ ctx, path: [...path, i] }) : r,
+		);
 
-    def rank(self):
-        return 0
+		// # print(this.items)
 
-    def ok(self):
-        return False
-
-    @staticmethod
-    def from_rule(rule: CountRule, *, items) -> CountSolution:
-        return CountSolution(count=rule.count, items=items)
-
-    def flatten(self):
-        return (x for s in self.items for x in s.flatten())
-
-    def audit(self, *, ctx: RequirementContext, path: List) -> Result:
-        path = [*path, f".of"]
-
-        results = tuple(
-            r.audit(ctx=ctx, path=[*path, i]) if r.state() == "solution" else r
-            for i, r in enumerate(self.items)
-        )
-
-        # print(self.items)
-
-        return CountResult(count=self.count, items=results)
+		return new CountResult({ count: this.count, items: results });
+	}
+}

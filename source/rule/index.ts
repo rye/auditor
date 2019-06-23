@@ -11,7 +11,7 @@ export function loadRule(data: any): Rule {
 	if (CourseRule.can_load(data)) {
 		return CourseRule.load(data);
 	} else if (FromRule.can_load(data)) {
-		return FromRule.load(data);
+		return new FromRule(data);
 	} else if (CountRule.can_load(data)) {
 		return CountRule.load(data);
 	} else if (ReferenceRule.can_load(data)) {

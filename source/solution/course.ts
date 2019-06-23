@@ -1,78 +1,76 @@
-from __future__ import annotations
-from dataclasses import dataclass
-from typing import Union, List, Optional, Any, TYPE_CHECKING
-import itertools
-import logging
+import { CourseRule } from "../rule";
+import { CourseResult } from "../result";
+import { RequirementContext } from "../requirement";
+import { Solution } from "./interface";
+import { logger } from "../logging";
 
-if TYPE_CHECKING:
-    from ..rule import CourseRule
-    from ..result import Result
-    from ..requirement import RequirementContext
+export class CourseSolution implements Solution {
+	readonly course: string;
+	readonly rule: CourseRule;
 
-from ..result import CourseResult
-from ..data import CourseStatus
+	constructor({ course, rule }: { course: string; rule: CourseRule }) {
+		this.course = course;
+		this.rule = rule;
+	}
 
-logger = logging.getLogger(__name__)
+	state(): "solution" {
+		return "solution";
+	}
 
+	claims() {
+		return [];
+	}
 
-@dataclass(frozen=True)
-class CourseSolution:
-    course: str
-    rule: CourseRule
+	rank(): 0 {
+		return 0;
+	}
 
-    def __repr__(self):
-        return self.course
+	ok() {
+		return false;
+	}
 
-    def to_dict(self):
-        return {
-            **self.rule.to_dict(),
-            "state": self.state(),
-            "status": "pending",
-            "ok": self.ok(),
-            "rank": self.rank(),
-            "claims": self.claims(),
-        }
+	audit({ ctx, path }: { ctx: RequirementContext; path: string[] }) {
+		path = [...path, `$c->${this.course}`];
 
-    def state(self):
-        return "solution"
+		let matched_course = ctx.find_course(this.course);
+		if (!matched_course) {
+			logger.debug(`course "${this.course}" does not exist in the transcript`, {
+				path,
+			});
+			return new CourseResult({
+				course: this.course,
+				rule: this.rule,
+				claim_attempt: null,
+			});
+		}
 
-    def claims(self):
-        return []
+		let claim = ctx.make_claim({
+			course: matched_course,
+			crsid: matched_course.shorthand,
+			path: path,
+			clause: this.rule,
+		});
 
-    def rank(self):
-        return 0
+		if (claim.failed()) {
+			logger.debug(
+				`course "${this.course}" exists, but has already been claimed by ${claim.conflict_with}`,
+				{ path },
+			);
+			return new CourseResult({
+				course: this.course,
+				rule: this.rule,
+				claim_attempt: claim,
+			});
+		}
 
-    def ok(self):
-        return False
+		logger.debug(`course "${this.course}" exists, and has not been claimed`, {
+			path,
+		});
 
-    def flatten(self):
-        return [self.course]
-
-    def audit(self, *, ctx: RequirementContext, path: List):
-        path = [*path, f"$c->{self.course}"]
-
-        matched_course = ctx.find_course(self.course)
-        if matched_course is None:
-            logger.debug(
-                f'{path}\n\tcourse "{self.course}" does not exist in the transcript'
-            )
-            return CourseResult(course=self.course, rule=self.rule, claim_attempt=None)
-
-        claim = ctx.make_claim(
-            course=matched_course,
-            crsid=matched_course.shorthand,
-            path=path,
-            clause=self.rule,
-        )
-
-        if claim.failed():
-            logger.debug(
-                f'{path}\n\tcourse "{self.course}" exists, but has already been claimed by {claim.conflict_with}'
-            )
-            return CourseResult(course=self.course, rule=self.rule, claim_attempt=claim)
-
-        logger.debug(
-            f'{path}\n\tcourse "{self.course}" exists, and has not been claimed'
-        )
-
-        return CourseResult(course=self.course, rule=self.rule, claim_attempt=claim)
+		return new CourseResult({
+			course: this.course,
+			rule: this.rule,
+			claim_attempt: claim,
+		});
+	}
+}

@@ -1,13 +1,5 @@
-// import itertools
-
-import { logger } from "../logging";
-
-import { CourseSolution } from "../solution";
-import {
-	RequirementContext,
-	RequirementSolution,
-	RequirementState,
-} from "../requirement";
+import { Solution } from "../solution";
+import { RequirementContext, RequirementState } from "../requirement";
 import { Rule } from "./interface";
 
 export class ReferenceRule implements Rule {
@@ -17,7 +9,7 @@ export class ReferenceRule implements Rule {
 		this.name = name;
 	}
 
-	state() {
+	state(): "rule" {
 		return "rule";
 	}
 
@@ -25,7 +17,7 @@ export class ReferenceRule implements Rule {
 		return [];
 	}
 
-	rank() {
+	rank(): 0 {
 		return 0;
 	}
 
@@ -85,7 +77,13 @@ export class ReferenceRule implements Rule {
 		// return state.estimate((ctx = ctx));
 	}
 
-	*solutions({ ctx, path }: { ctx: RequirementContext; path: string[] }) {
+	*solutions({
+		ctx,
+		path,
+	}: {
+		ctx: RequirementContext;
+		path: string[];
+	}): IterableIterator<Solution> {
 		let requirement = ctx.requirements.get(this.name);
 
 		let state = this.init({ ctx, path });

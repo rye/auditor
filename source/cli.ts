@@ -16,13 +16,17 @@ import { AreaOfStudy } from "./area";
 import { CourseInstance, CourseStatus } from "./data";
 import { Operator } from "./clause";
 
-import { take, sum, DefaultMap, enumerate } from "./lib";
+import { take, sum, intersection, DefaultMap, enumerate } from "./lib";
 
 import yargs from "yargs";
 import { performance } from "perf_hooks";
 
 type Student = {
 	stnum: string;
+	courses: readonly any[];
+	degrees: readonly string[];
+	majors: readonly string[];
+	concentrations: readonly string[];
 };
 
 // Audits a student against their areas of study.
@@ -105,16 +109,12 @@ function main() {
 		let text = readFileSync(f, { encoding: "utf-8" });
 		let s = JSON.parse(text);
 
-		if ((new Set(s["degrees"]) as any).intersection(allowed.get("degree"))) {
+		if (intersection(new Set(s["degrees"]), allowed.get("degree"))) {
+			students.push(s);
+		} else if (intersection(new Set(s["majors"]), allowed.get("major"))) {
 			students.push(s);
 		} else if (
-			(new Set(s["majors"]) as any).intersection(allowed.get("major"))
-		) {
-			students.push(s);
-		} else if (
-			(new Set(s["concentrations"]) as any).intersection(
-				allowed.get("concentration"),
-			)
+			intersection(new Set(s["concentrations"]), allowed.get("concentration"))
 		) {
 			students.push(s);
 		} else {
@@ -130,7 +130,7 @@ function main() {
 function run(
 	students: Student[],
 	areas: any[],
-	allowed: ReadonlyMap<string, Set<string>>,
+	allowed: DefaultMap<string, Set<string>>,
 	args: any,
 ) {
 	if (!students.length) {
@@ -147,17 +147,20 @@ function run(
 		}
 
 		let degree_names: Set<string> = new Set(student["degrees"]);
-		let allowed_degree_names: Set<string> = (degree_names as any).intersection(
+		let allowed_degree_names: Set<string> = intersection(
+			degree_names,
 			allowed.get("degree"),
 		);
 
 		let major_names: Set<string> = new Set(student["majors"]);
-		let allowed_major_names: Set<string> = (major_names as any).intersection(
+		let allowed_major_names: Set<string> = intersection(
+			major_names,
 			allowed.get("major"),
 		);
 
 		let conc_names: Set<string> = new Set(student["concentrations"]);
-		let allowed_conc_names: Set<string> = (conc_names as any).intersection(
+		let allowed_conc_names: Set<string> = intersection(
+			conc_names,
 			allowed.get("concentration"),
 		);
 

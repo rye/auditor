@@ -9,23 +9,28 @@ import { logger } from "../../logging";
 import assert from "assert";
 import { enumerate } from "../../lib";
 import { CourseInstance } from "../../data";
+import { FromSolution } from "../../solution";
 
-class FromRule implements Rule {
+export class FromRule implements Rule {
 	readonly source: FromInput;
 	readonly action: null | Assertion = null;
 	readonly limit: LimitSet;
 	readonly where: null | Clause = null;
 
-	state() {
+	state(): "rule" {
 		return "rule";
 	}
 
-	ok() {
-		return true;
+	claims() {
+		return [];
 	}
 
-	rank() {
+	rank(): 0 {
 		return 0;
+	}
+
+	ok() {
+		return false;
 	}
 
 	static can_load(data: any): boolean {
@@ -48,6 +53,10 @@ class FromRule implements Rule {
 		}
 
 		this.source = new FromInput(data.from);
+	}
+
+	estimate({ ctx }: { ctx: RequirementContext }) {
+		return 0;
 	}
 
 	validate({ ctx }: { ctx: RequirementContext }) {
@@ -108,9 +117,13 @@ class FromRule implements Rule {
 		ctx: RequirementContext;
 		path: string[];
 	}): IterableIterator<readonly CourseInstance[]> {
-		let reqs = this.source.saves.map(r =>
-			ctx.requirements.get(r).solutions({ ctx, path }),
-		);
+		let reqs = this.source.requirements.map(r => {
+			let req = ctx.requirements.get(r);
+			if (!req) {
+				throw new Error(`could not find ${req}`);
+			}
+			return req.solutions({ ctx, path });
+		});
 
 		for (let p of product(...reqs)) {
 			yield Array.from(new Set(p.flatMap(req_result => req_result.matched())));
@@ -123,7 +136,7 @@ class FromRule implements Rule {
 	}: {
 		ctx: RequirementContext;
 		path: string[];
-	}): IterableIterator<readonly CourseInstance[]> {
+	}): IterableIterator<FromSolution> {
 		path = [...path, ".from"];
 		logger.debug(path);
 

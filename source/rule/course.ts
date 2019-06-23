@@ -1,7 +1,7 @@
 import { logger } from "../logging";
 import assert from "assert";
 
-import { CourseSolution } from "../solution";
+import { CourseSolution, Solution } from "../solution";
 import { RequirementContext } from "../requirement";
 import { CourseInstance } from "../data";
 
@@ -30,7 +30,7 @@ export class CourseRule implements Rule {
 		this.allow_claimed = allow_claimed;
 	}
 
-	state() {
+	state(): "rule" {
 		return "rule";
 	}
 
@@ -38,7 +38,7 @@ export class CourseRule implements Rule {
 		return [];
 	}
 
-	rank() {
+	rank(): 0 {
 		return 0;
 	}
 
@@ -65,7 +65,7 @@ export class CourseRule implements Rule {
 	private singleDeptRegex = /[A-Z]{3,5} [0-9]{3}/;
 	private multiDeptRegex = /[A-Z]{2}\/[A-Z]{2} [0-9]{3}/;
 	private interDeptRegex = /(IS|ID) [0-9]{3}/;
-	validate(ctx: RequirementContext) {
+	validate({ ctx }: { ctx: RequirementContext }) {
 		let method_a = this.singleDeptRegex.test(this.course);
 		let method_b = this.multiDeptRegex.test(this.course);
 		let method_c = this.interDeptRegex.test(this.course);
@@ -76,13 +76,19 @@ export class CourseRule implements Rule {
 		);
 	}
 
-	*solutions({ ctx, path }: { ctx: RequirementContext; path: string[] }) {
+	*solutions({
+		ctx,
+		path,
+	}: {
+		ctx: RequirementContext;
+		path: string[];
+	}): IterableIterator<Solution> {
 		logger.debug(`${path} reference to course "${this.course}"`);
 
-		yield CourseSolution({ course: this.course, rule: this });
+		yield new CourseSolution({ course: this.course, rule: this });
 	}
 
-	estimate(ctx: RequirementContext) {
+	estimate({ ctx }: { ctx: RequirementContext }) {
 		return 1;
 	}
 

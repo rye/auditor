@@ -3,30 +3,9 @@ import { Limit } from "./limit";
 import { loadClause, Clause } from "./clause";
 import { CourseInstance } from "./data";
 import { RequirementContext, Requirement } from "./requirement";
-
-import { loggers } from "winston";
-const logger = loggers.get("degreepath");
-
-interface Rule {
-	solutions(_: { ctx: RequirementContext; path: string[] }): any;
-	validate(_: { ctx: RequirementContext }): void;
-	estimate(_: { ctx: RequirementContext }): number;
-}
-class CourseRule implements Rule {
-	constructor(data: any) {}
-	validate() {}
-	estimate({ ctx }: { ctx: RequirementContext }) {
-		return 1;
-	}
-	solutions({ ctx, path }: { ctx: RequirementContext; path: string[] }): any {}
-}
-function loadRule(data: any): Rule {
-	return new CourseRule(null);
-}
-
-interface Solution {
-	audit({ ctx, path }: { ctx: any; path: (string | number)[] }): any;
-}
+import { Solution } from "./solution";
+import { logger } from "./logging";
+import { Rule, CourseRule, loadRule } from "./rule";
 
 class InvalidMulticountable extends TypeError {}
 

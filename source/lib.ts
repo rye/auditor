@@ -1,4 +1,5 @@
 import { Decimal } from "decimal.js";
+import { KeyObject } from "crypto";
 
 const GRADES = new Map(
 	Object.entries({
@@ -41,14 +42,16 @@ export function* expand_subjects(subjects: string[]) {
 	}
 }
 
-export function* enumerate(iterable: any) {
+export function* enumerate<T>(
+	iterable: Iterable<T>,
+): IterableIterator<[number, T]> {
 	let index = 0;
 	for (let item of iterable) {
 		yield [index, item];
 	}
 }
 
-export function* take(iter: any, n = 5) {
+export function* take<T>(iter: Iterable<T>, n = 5): IterableIterator<T> {
 	for (let [i, item] of enumerate(iter)) {
 		if (i >= n) {
 			break;
@@ -57,7 +60,7 @@ export function* take(iter: any, n = 5) {
 	}
 }
 
-export class DefaultMap<K, V> extends Map {
+export class DefaultMap<K, V> extends Map<K, V> {
 	private initFn: () => V;
 
 	static empty<K, V>(init: () => V) {

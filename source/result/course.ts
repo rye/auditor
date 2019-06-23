@@ -2,7 +2,7 @@ import { Result } from "./interface";
 import { CourseRule } from "../rule";
 import { ClaimAttempt } from "../requirement";
 
-class CourseResult implements Result {
+export class CourseResult implements Result {
 	readonly course: string;
 	readonly rule: CourseRule;
 	readonly claim_attempt: null | ClaimAttempt = null;
