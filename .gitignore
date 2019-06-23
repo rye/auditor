@@ -9,3 +9,7 @@ __pycache__/
 # Ignore IntelliJ files
 /.idea/
 /.vscode/
+/node_modules
+/.tsincrinfo
+/build
+/*.log
