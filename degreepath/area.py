@@ -56,13 +56,13 @@ class AreaOfStudy:
         multicountable = []
         for ruleset in attributes.get("multicountable", []):
             clause = []
-            for clause in ruleset:
-                if "course" in clause:
-                    item = CourseRule.load(clause)
-                elif "attributes" in clause:
-                    item = SingleClause.load(clause)
+            for ruleclause in ruleset:
+                if "course" in ruleclause:
+                    item = CourseRule.load(ruleclause)
+                elif "attributes" in ruleclause:
+                    item = SingleClause.load(ruleclause)
                 else:
-                    raise Exception(f"invalid multicountable {clause}")
+                    raise Exception(f"invalid multicountable {ruleclause}")
                 clause.append(item)
             multicountable.append(clause)
 
