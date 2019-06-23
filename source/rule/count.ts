@@ -8,8 +8,8 @@ import { Rule } from "./interface";
 import { loadRule } from "./index";
 import { range, enumerate, difference } from "../lib";
 import { sortBy } from "lodash";
-import cartesian from "fast-cartesian";
-import combinations from "combinations-generator";
+import cartesian from "../vendor/cartesian";
+import combinations from "../vendor/combinations";
 
 export class CountRule implements Rule {
 	readonly count: number;
@@ -146,7 +146,6 @@ export class CountRule implements Rule {
 				);
 
 				let selected_original_indices = new Map();
-				let last_missing_idx = 0;
 				for (let [idx, item] of enumerate(this.items)) {
 					if (!other_children.includes(item)) {
 						selected_original_indices.set(item, idx);
@@ -169,10 +168,10 @@ export class CountRule implements Rule {
 					let req_ident_map: Map<number, number> = new Map();
 					let do_not_yield = false;
 
-					let cleaned = [];
+					let cleaned: Solution[] = [];
 
-					let solution;
 					for (let rulesol of solutionset) {
+						let solution;
 						if (Array.isArray(rulesol)) {
 							let [req_ident, req_idx] = rulesol[0];
 
