@@ -11,11 +11,9 @@ import { loggers } from "winston";
 const logging = loggers.get("degreepath");
 import { enumerate, DefaultMap } from "./lib";
 
-// from frozendict import frozendict
-
 import { CourseInstance, CourseStatus } from "./data";
 import { SaveRule } from "./save";
-import { Rule, CourseRule, loadRule } from "./rule";
+import { CourseRule, loadRule, Rule } from "./rule";
 import { Solution } from "./solution";
 import { Clause } from "./clause";
 import { Result } from "./result";
@@ -26,7 +24,7 @@ export class RequirementContext {
 	readonly save_rules: ReadonlyMap<string, SaveRule>;
 	readonly requirement_cache: WeakMap<Requirement, RequirementState>;
 	readonly multicountable: ReadonlyArray<ReadonlyArray<CourseRule | Clause>>;
-	readonly claims: DefaultMap<string, Set<Claim>>;
+	claims: DefaultMap<string, Set<Claim>>;
 
 	constructor(args: {
 		transcript?: ReadonlyArray<CourseInstance>;
@@ -246,9 +244,9 @@ export class RequirementState {
 	vals: Array<any> = [];
 	iter: any;
 
-	constructor(iterable) {
+	constructor(iterable: Iterable<any>) {
 		// self.iter = iter(iterable)
-		this.done = False;
+		this.done = false;
 		this.vals = [];
 	}
 
@@ -276,7 +274,7 @@ export class Requirement {
 	readonly name: string;
 	readonly saves: ReadonlyMap<string, SaveRule>;
 	readonly requirements: ReadonlyMap<string, Requirement>;
-	readonly result?: Solution;
+	readonly result?: Rule;
 	readonly message?: string;
 	readonly audited_by?: "department" | "registrar";
 	readonly contract: boolean;
@@ -340,7 +338,7 @@ export class Requirement {
 		});
 
 		if (this.result) {
-			this.result.validate((ctx = new_ctx));
+			this.result.validate({ ctx: new_ctx });
 		}
 	}
 
@@ -378,7 +376,7 @@ export class Requirement {
 		let ident = [...path, this.name].join(",");
 
 		for (let [i, solution] of enumerate(
-			this.result.solutions((ctx = new_ctx), (path = path)),
+			this.result.solutions({ ctx: new_ctx, path: path }),
 		)) {
 			yield new RequirementSolution(this, {
 				inputs: [[ident, i]],
@@ -388,13 +386,17 @@ export class Requirement {
 	}
 
 	estimate({ ctx }: { ctx: RequirementContext }) {
+		if (!this.result) {
+			return 0;
+		}
+
 		let new_ctx = new RequirementContext({
 			transcript: ctx.transcript,
 			save_rules: this.saves,
 			requirements: this.requirements,
 		});
 
-		return this.result.estimate((ctx = new_ctx));
+		return this.result.estimate({ ctx: new_ctx });
 	}
 }
 
@@ -433,6 +435,9 @@ export class RequirementSolution {
 		if (this.audited_by) {
 			return "solution";
 		}
+		if (!this.result) {
+			return "solution";
+		}
 		return this.result.state();
 	}
 
@@ -440,15 +445,17 @@ export class RequirementSolution {
 		if (this.audited_by) {
 			return [];
 		}
+		if (!this.result) {
+			return [];
+		}
 		return this.result.claims();
 	}
 
 	ok() {
+		if (!this.result) {
+			return true;
+		}
 		return this.result.ok();
-	}
-
-	flatten() {
-		return this.result.flatten();
 	}
 
 	audit({
@@ -494,11 +501,17 @@ export class RequirementResult {
 		if (this.audited_by) {
 			return "result";
 		}
+		if (!this.result) {
+			return "result";
+		}
 		return this.result.state();
 	}
 
 	claims() {
 		if (this.audited_by) {
+			return [];
+		}
+		if (!this.result) {
 			return [];
 		}
 		return this.result.claims();

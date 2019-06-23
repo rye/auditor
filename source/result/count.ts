@@ -14,7 +14,7 @@ export class CountResult implements Result {
 		this.items = args.items;
 	}
 
-	state() {
+	state(): "result" {
 		return "result";
 	}
 

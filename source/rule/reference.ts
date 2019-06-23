@@ -58,9 +58,7 @@ export class ReferenceRule implements Rule {
 		let state = ctx.requirement_cache.get(requirement);
 
 		if (!state) {
-			state = new RequirementState({
-				iterable: requirement.solutions({ ctx, path }),
-			});
+			state = new RequirementState(requirement.solutions({ ctx, path }));
 			ctx.requirement_cache.set(requirement, state);
 		}
 
@@ -77,13 +75,12 @@ export class ReferenceRule implements Rule {
 		// return state.estimate((ctx = ctx));
 	}
 
-	*solutions({
-		ctx,
-		path,
-	}: {
+	*solutions(args: {
 		ctx: RequirementContext;
 		path: string[];
 	}): IterableIterator<Solution> {
+		let { ctx, path } = args;
+
 		let requirement = ctx.requirements.get(this.name);
 
 		let state = this.init({ ctx, path });

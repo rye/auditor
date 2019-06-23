@@ -25,7 +25,7 @@ export class CourseResult implements Result {
 		}
 	}
 
-	state() {
+	state(): "result" {
 		return "result";
 	}
 

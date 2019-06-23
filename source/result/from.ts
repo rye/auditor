@@ -29,7 +29,7 @@ export class FromResult implements Result {
 		return this.successful_claims;
 	}
 
-	state() {
+	state(): "result" {
 		return "result";
 	}
 
@@ -41,7 +41,7 @@ export class FromResult implements Result {
 		// TODO: fix this calculation so that it properly handles #154647's audit
 		return Math.min(
 			this.successful_claims.length + this.failed_claims.length,
-			this.rule.action.get_value(),
+			this.rule.action ? this.rule.action.get_value() : 0,
 		);
 	}
 }
