@@ -28,3 +28,5 @@ loggers.add("degreepath", {
 	defaultMeta: { service: "degreepath" },
 	transports: winstonTransports,
 });
+
+export const logger = loggers.get("degreepath");

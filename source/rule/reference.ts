@@ -1,7 +1,6 @@
 // import itertools
 
-import { loggers } from "winston";
-const logger = loggers.get("degreepath");
+import { logger } from "../logging";
 
 import { CourseSolution } from "../solution";
 import {
@@ -11,7 +10,7 @@ import {
 } from "../requirement";
 import { Rule } from "./interface";
 
-class ReferenceRule implements Rule {
+export class ReferenceRule implements Rule {
 	readonly name: string;
 
 	constructor(name: string) {

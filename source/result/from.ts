@@ -2,13 +2,23 @@ import { ClaimAttempt } from "../requirement";
 import { FromRule } from "../rule";
 import { Result } from "./interface";
 
-class FromResult implements Result {
+export class FromResult implements Result {
 	readonly rule: FromRule;
 	readonly successful_claims: ReadonlyArray<ClaimAttempt>;
 	readonly failed_claims: ReadonlyArray<ClaimAttempt>;
 	readonly success: boolean;
 
-	constructor({ rule, successful_claims, failed_claims, success }) {
+	constructor({
+		rule,
+		successful_claims,
+		failed_claims,
+		success,
+	}: {
+		readonly rule: FromRule;
+		readonly successful_claims: ReadonlyArray<ClaimAttempt>;
+		readonly failed_claims: ReadonlyArray<ClaimAttempt>;
+		readonly success: boolean;
+	}) {
 		this.rule = rule;
 		this.successful_claims = successful_claims;
 		this.failed_claims = failed_claims;

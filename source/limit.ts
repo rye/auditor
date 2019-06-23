@@ -24,7 +24,7 @@ export class LimitSet {
 		this.limits = (data || []).map(l => new Limit(l));
 	}
 
-	apply_limits(courses: CourseInstance[]) {
+	apply_limits(courses: ReadonlyArray<CourseInstance>) {
 		let clause_counters: Map<Limit, number> = new Map(); //defaultdict(int)
 		let course_set = [];
 
@@ -74,7 +74,7 @@ export class LimitSet {
 		return course_set;
 	}
 
-	*limited_transcripts(courses: CourseInstance[]) {
+	*limited_transcripts(courses: ReadonlyArray<CourseInstance>) {
 		/*
         We need to iterate over each combination of limited courses.
 

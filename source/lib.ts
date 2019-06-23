@@ -80,3 +80,21 @@ export class DefaultMap<K, V> extends Map {
 export function sum(iter: number[]) {
 	return iter.reduce((acc, v) => acc + v, 0);
 }
+
+export function* range(start: number, end: number) {
+	for (let i = start; i < end; i++) {
+		yield i;
+	}
+}
+
+export function difference<T>(a: Set<T>, b: Set<T>) {
+	return new Set([...a].filter(x => !b.has(x)));
+}
+
+export function union<T>(a: Set<T>, b: Set<T>) {
+	return new Set([...a, ...b]);
+}
+
+export function intersection<T>(a: Set<T>, b: Set<T>) {
+	return new Set([...a].filter(x => b.has(x)));
+}
