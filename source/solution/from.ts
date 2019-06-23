@@ -1,4 +1,4 @@
-import { FromRule, Rule } from "../rule";
+import { FromRule } from "../rule";
 import { Result, FromResult } from "../result";
 import { RequirementContext } from "../requirement";
 import { Solution } from "./interface";
@@ -7,17 +7,17 @@ import { Decimal } from "decimal.js";
 
 import { CourseInstance, Term } from "../data";
 
-type Output =
+export type FromOutput =
 	| readonly CourseInstance[]
 	| readonly Term[]
 	| readonly Decimal[]
 	| readonly number[];
 
 export class FromSolution implements Solution {
-	readonly output: Output;
+	readonly output: FromOutput;
 	readonly rule: FromRule;
 
-	constructor({ rule, output }: { rule: FromRule; output: Output }) {
+	constructor({ rule, output }: { rule: FromRule; output: FromOutput }) {
 		this.rule = rule;
 		this.output = output;
 	}
@@ -60,19 +60,19 @@ export class FromSolution implements Solution {
 		throw new TypeError(`unknown "from" type "${this.rule.source.mode}"`);
 	}
 
-	isCourseOutput(items: Output): items is readonly CourseInstance[] {
+	isCourseOutput(items: FromOutput): items is readonly CourseInstance[] {
 		return items[0] instanceof CourseInstance;
 	}
 
-	isDecimalOutput(items: Output): items is readonly Decimal[] {
+	isDecimalOutput(items: FromOutput): items is readonly Decimal[] {
 		return items[0] instanceof Decimal;
 	}
 
-	isTermOutput(items: Output): items is readonly Term[] {
+	isTermOutput(items: FromOutput): items is readonly Term[] {
 		return items[0] instanceof Term;
 	}
 
-	isNumberOutput(items: Output): items is readonly number[] {
+	isNumberOutput(items: FromOutput): items is readonly number[] {
 		return Number.isFinite(items[0] as number);
 	}
 

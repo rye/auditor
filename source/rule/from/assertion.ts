@@ -7,6 +7,10 @@ import { RequirementContext } from "../../requirement";
 export interface Assertion {
 	apply(value: any): boolean;
 	validate(_: { ctx: RequirementContext }): void;
+	minmax(items: readonly any[]): { lo: number; hi: number };
+	range(items: readonly any[]): Iterable<number>;
+	get_min_value(): string | number;
+	get_max_value(): string | number;
 }
 
 export function loadAssertion(data: any): Assertion {
@@ -35,6 +39,30 @@ export class AndAssertion implements Assertion {
 	apply(value: any) {
 		return this.children.every(child => child.apply(value));
 	}
+
+	minmax(items: readonly any[]): { lo: number; hi: number } {
+		let ranges = this.children.map(c => c.minmax(items));
+		let los = ranges.map(r => r.lo);
+		let his = ranges.map(r => r.hi);
+		let lo = Math.min(...los);
+		let hi = Math.max(...his);
+		return { lo, hi };
+	}
+
+	range(items: readonly any[]): Iterable<number> {
+		// count(courses) > 6 AND count(departments) > 7
+		// output: min=6, max=7
+		let { lo, hi } = this.minmax(items);
+		return range(lo, hi);
+	}
+
+	get_min_value() {
+		return Math.min(...(this.children.map(c => c.get_min_value()) as number[]));
+	}
+
+	get_max_value() {
+		return Math.min(...(this.children.map(c => c.get_max_value()) as number[]));
+	}
 }
 
 export class OrAssertion implements Assertion {
@@ -50,6 +78,30 @@ export class OrAssertion implements Assertion {
 
 	apply(value: any) {
 		return this.children.some(child => child.apply(value));
+	}
+
+	minmax(items: readonly any[]): { lo: number; hi: number } {
+		let ranges = this.children.map(c => c.minmax(items));
+		let los = ranges.map(r => r.lo);
+		let his = ranges.map(r => r.hi);
+		let lo = Math.min(...los);
+		let hi = Math.max(...his);
+		return { lo, hi };
+	}
+
+	range(items: readonly any[]): Iterable<number> {
+		// count(courses) > 6 AND count(departments) > 7
+		// output: min=6, max=7
+		let { lo, hi } = this.minmax(items);
+		return range(lo, hi);
+	}
+
+	get_min_value() {
+		return Math.min(...(this.children.map(c => c.get_min_value()) as number[]));
+	}
+
+	get_max_value() {
+		return Math.min(...(this.children.map(c => c.get_max_value()) as number[]));
 	}
 }
 
@@ -123,10 +175,10 @@ export class SingleAssertion {
 		}
 	}
 
-	get_value() {
-		let compare_to: any = this.compare_to;
+	get_min_value() {
+		let compare_to = this.compare_to;
 
-		if (!Number.isFinite(compare_to)) {
+		if (!Number.isFinite(compare_to as any)) {
 			throw new TypeError(
 				`compare_to must be numeric to be used in min(); was ${typeof compare_to} (${compare_to}`,
 			);
@@ -135,12 +187,33 @@ export class SingleAssertion {
 		return compare_to;
 	}
 
-	range(items: any[]) {
+	get_max_value() {
+		let compare_to = this.compare_to;
+
+		if (!Number.isFinite(compare_to as any)) {
+			throw new TypeError(
+				`compare_to must be numeric to be used in max(); was ${typeof compare_to} (${compare_to}`,
+			);
+		}
+
+		return compare_to;
+	}
+
+	/**
+	 * @description find the smallest and largest numbers of items
+	 *   which can satisfy the rule, and return a range between them
+	 */
+	range(items: readonly any[]): Iterable<number> {
+		let { lo, hi } = this.minmax(items);
+		return range(lo, hi);
+	}
+
+	minmax(items: readonly any[]): { lo: number; hi: number } {
 		let compare_to: any = this.compare_to;
 
 		if (!Number.isFinite(compare_to)) {
 			throw new TypeError(
-				`compare_to must be numeric to be used in range(); was ${typeof compare_to} (${compare_to}`,
+				`compare_to must be numeric to be used in a range; was ${typeof compare_to} (${compare_to}`,
 			);
 		}
 
@@ -168,10 +241,10 @@ export class SingleAssertion {
 			logger.info(`expected hi=${hi} > lo=${lo}`);
 		}
 
-		return range(lo, hi);
+		return { lo, hi };
 	}
 
-	apply(value: any) {
+	apply(value: any): boolean {
 		let compare_to: any = this.compare_to;
 
 		if (!Number.isFinite(compare_to)) {

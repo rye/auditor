@@ -1,8 +1,4 @@
-import "core-js/proposals/set-methods";
-import "./logging";
-
-import { loggers } from "winston";
-const logger = loggers.get("degreepath");
+import { logger } from "./logging";
 
 import { readFileSync, existsSync, unlinkSync, writeFileSync } from "fs";
 

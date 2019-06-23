@@ -1,6 +1,5 @@
 import assert from "assert";
-import { loggers } from "winston";
-const logging = loggers.get("degreepath");
+import { logger } from "./logging";
 
 import { FromRule } from "./rule";
 import { RequirementContext } from "./requirement";
@@ -23,7 +22,7 @@ export class SaveRule {
 
 	*solutions({ ctx, path }: { ctx: RequirementContext; path: string[] }) {
 		path = [...path, `.save["${this.name}"]`];
-		logging.debug("inside a saverule", { path });
+		logger.debug("inside a saverule", { path });
 		yield* this.innards.solutions({ ctx, path });
 	}
 }

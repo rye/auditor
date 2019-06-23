@@ -1,4 +1,3 @@
-import { Rule } from "../rule";
 import { RequirementContext, ClaimAttempt } from "../requirement";
 
 export interface Solution {

@@ -1,5 +1,4 @@
-import { loggers } from "winston";
-const logging = loggers.get("degreepath");
+import { logger } from "./logging";
 
 import { Clause, loadClause } from "./clause";
 import { enumerate } from "./lib";
@@ -30,25 +29,25 @@ export class LimitSet {
 
 		if (courses) {
 			for (let [i, c] of enumerate(courses)) {
-				logging.debug(`limit/before/${i}`, { c });
+				logger.debug(`limit/before/${i}`, { c });
 			}
 		} else {
-			logging.debug("limit/before: []");
+			logger.debug("limit/before: []");
 		}
 
 		for (let c of courses) {
 			let may_yield = false;
 
 			for (let l of this.limits) {
-				logging.debug(`limit/check: checking ${c.identity} against`, { l });
+				logger.debug(`limit/check: checking ${c.identity} against`, { l });
 				if (c.apply_clause(l.where)) {
 					let foo = clause_counters.get(l) || 0;
 					if (foo < l.at_most) {
-						logging.debug(`limit/increment: ${c.identity} matched`, { l });
+						logger.debug(`limit/increment: ${c.identity} matched`, { l });
 						clause_counters.set(l, foo + 1);
 						may_yield = true;
 					} else {
-						logging.debug(`limit/maximum: ${c.identity} matched`, { l });
+						logger.debug(`limit/maximum: ${c.identity} matched`, { l });
 						may_yield = false;
 					}
 				} else {
@@ -63,13 +62,13 @@ export class LimitSet {
 
 		if (course_set.length) {
 			for (let [i, c] of enumerate(course_set)) {
-				logging.debug(`limit/after/${i}`, { c });
+				logger.debug(`limit/after/${i}`, { c });
 			}
 		} else {
-			logging.debug("limit/after: []");
+			logger.debug("limit/after: []");
 		}
 
-		logging.debug("limit/state", { clause_counters });
+		logger.debug("limit/state", { clause_counters });
 
 		return course_set;
 	}
@@ -86,7 +85,7 @@ export class LimitSet {
 
 		// skip _everything_ in here if there are no limits to apply
 		if (!this.limits.length) {
-			logging.debug("No limits to apply");
+			logger.debug("No limits to apply");
 			yield courses;
 			return;
 		}
@@ -97,7 +96,7 @@ export class LimitSet {
 			let current = extra_iter_counters.get(l) || 0;
 
 			for (let c of courses) {
-				logging.debug(`limit/probe: checking ${c.identity} against`, { l });
+				logger.debug(`limit/probe: checking ${c.identity} against`, { l });
 				if (c.apply_clause(l.where)) {
 					extra_iter_counters.set(l, current + 1);
 				}
@@ -115,11 +114,11 @@ export class LimitSet {
 
 		// if nothing needs extra iteration, just spit out the limited transcript once
 		if (!filled_extra_iter_counters.length) {
-			logging.debug("No limits result in extra combinations");
+			logger.debug("No limits result in extra combinations");
 			yield this.apply_limits(courses);
 		}
 
-		logging.debug(
+		logger.debug(
 			`Limits result in ${filled_extra_iter_counters.length} extra combinations`,
 		);
 		// TODO: figure out how to do this

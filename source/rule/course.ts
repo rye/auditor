@@ -13,17 +13,13 @@ export class CourseRule implements Rule {
 	readonly grade: string | null;
 	readonly allow_claimed: boolean;
 
-	constructor({
-		course,
-		hidden,
-		grade,
-		allow_claimed,
-	}: {
+	constructor(args: {
 		course: string;
 		hidden: boolean;
 		grade: string;
 		allow_claimed: boolean;
 	}) {
+		let { course, hidden, grade, allow_claimed } = args;
 		this.course = course;
 		this.hidden = hidden;
 		this.grade = grade;
@@ -76,13 +72,11 @@ export class CourseRule implements Rule {
 		);
 	}
 
-	*solutions({
-		ctx,
-		path,
-	}: {
+	*solutions(args: {
 		ctx: RequirementContext;
 		path: string[];
 	}): IterableIterator<Solution> {
+		let { ctx, path } = args;
 		logger.debug(`${path} reference to course "${this.course}"`);
 
 		yield new CourseSolution({ course: this.course, rule: this });

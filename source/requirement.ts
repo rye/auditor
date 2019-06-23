@@ -1,14 +1,5 @@
-// from __future__ import annotations
-// from dataclasses import dataclass, field
-// from typing import List, Optional, Tuple, Any, Dict, Union, Set, TYPE_CHECKING
-// import logging
-// from collections import defaultdict
-// import itertools
-// import copy
-
 import assert from "assert";
-import { loggers } from "winston";
-const logging = loggers.get("degreepath");
+import { logger } from "./logging";
 import { enumerate, DefaultMap } from "./lib";
 
 import { CourseInstance, CourseStatus } from "./data";
@@ -174,10 +165,10 @@ export class RequirementContext {
 			// # the first ruleset applicable to both the course and the claimant is selected.
 			let ruleset = applicable_rulesets[0];
 
-			// # If the claimed course matches a `multicountable` ruleset,
-			// #   and the claimant is within said `multicountable` ruleset,
-			// #   and the claimant's clause has not already been used as a claim on this course,
-			// #   then the claim is recorded, and succeeds.
+			// If the claimed course matches a `multicountable` ruleset,
+			//   and the claimant is within said `multicountable` ruleset,
+			//   and the claimant's clause has not already been used as a claim on this course,
+			//   then the claim is recorded, and succeeds.
 			for (let ruleclause of ruleset) {
 				for (let c of potential_conflicts) {
 					if (!ruleclause.mc_applies_same(c)) {
@@ -250,13 +241,17 @@ export class RequirementState {
 		this.vals = [];
 	}
 
-	iter_solutions() {
-		if (this.done) {
-			return iter(this.vals);
+	*iter_solutions() {
+		for (let item of this.vals) {
+			yield item;
 		}
 
 		// chain vals so far & then gen the rest
-		return itertools.chain(this.vals, this._gen_iter());
+		if (!this.done) {
+			for (let item of this._gen_iter()) {
+				yield item;
+			}
+		}
 	}
 
 	private *_gen_iter() {
@@ -347,22 +342,22 @@ export class Requirement {
 
 		let header = `${path}\n\trequirement "${this.name}"`;
 
-		logging.debug(`${header} has not been evaluated`);
+		logger.debug(`${header} has not been evaluated`);
 
 		if (!this.message) {
-			logging.debug(`${header} has no message`);
+			logger.debug(`${header} has no message`);
 		}
 
 		if (!this.audited_by) {
-			logging.debug(`${header} is not audited`);
+			logger.debug(`${header} is not audited`);
 		}
 
 		if (!this.result) {
-			logging.debug(`${header} does not have a result`);
+			logger.debug(`${header} does not have a result`);
 			yield new RequirementSolution(this, { inputs: [] });
 			return;
 		} else {
-			logging.debug(`${header} has a result`);
+			logger.debug(`${header} has a result`);
 		}
 
 		let new_ctx = new RequirementContext({
@@ -400,7 +395,7 @@ export class Requirement {
 	}
 }
 
-export class RequirementSolution {
+export class RequirementSolution implements Solution {
 	readonly name: string;
 	readonly saves: ReadonlyMap<string, SaveRule>;
 	readonly requirements: ReadonlyMap<string, Requirement>;
@@ -456,6 +451,13 @@ export class RequirementSolution {
 			return true;
 		}
 		return this.result.ok();
+	}
+
+	rank() {
+		if (!this.result) {
+			return 0;
+		}
+		return this.result.rank();
 	}
 
 	audit({

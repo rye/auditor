@@ -2,13 +2,15 @@ import { FromInput } from "./source";
 import { Assertion, loadAssertion } from "./assertion";
 import { LimitSet } from "../../limit";
 import { Clause, loadClause } from "../../clause";
-import { FromSolution } from "../../solution";
+import { FromSolution, Solution } from "../../solution";
 import { RequirementContext } from "../../requirement";
 import { Rule } from "../interface";
 import { logger } from "../../logging";
 import assert from "assert";
 import { enumerate } from "../../lib";
 import { CourseInstance } from "../../data";
+import cartesian from "../../vendor/cartesian";
+import combinations from "../../vendor/combinations";
 
 export class FromRule implements Rule {
 	readonly source: FromInput;
@@ -93,13 +95,11 @@ export class FromRule implements Rule {
 		yield data;
 	}
 
-	*solutions_when_saves({
-		ctx,
-		path,
-	}: {
+	*solutions_when_saves(args: {
 		ctx: RequirementContext;
 		path: string[];
-	}): IterableIterator<readonly CourseInstance[]> {
+	}): IterableIterator<readonly Solution[]> {
+		let { ctx, path } = args;
 		let saves = this.source.saves.map(s => {
 			let save = ctx.save_rules.get(s);
 			if (!save) {
@@ -108,18 +108,16 @@ export class FromRule implements Rule {
 			return save.solutions({ ctx, path });
 		});
 
-		for (let p of product(...saves)) {
-			yield Array.from(new Set(p.flatMap(save_result => save_result.stored())));
+		for (let p of cartesian(...saves)) {
+			yield Array.from(new Set(p));
 		}
 	}
 
-	*solutions_when_reqs({
-		ctx,
-		path,
-	}: {
+	*solutions_when_reqs(args: {
 		ctx: RequirementContext;
 		path: string[];
-	}): IterableIterator<readonly CourseInstance[]> {
+	}): IterableIterator<readonly Solution[]> {
+		let { ctx, path } = args;
 		let reqs = this.source.requirements.map(r => {
 			let req = ctx.requirements.get(r);
 			if (!req) {
@@ -128,8 +126,8 @@ export class FromRule implements Rule {
 			return req.solutions({ ctx, path });
 		});
 
-		for (let p of product(...reqs)) {
-			yield Array.from(new Set(p.flatMap(req_result => req_result.matched())));
+		for (let p of cartesian(...reqs)) {
+			yield Array.from(new Set(p));
 		}
 	}
 
@@ -148,8 +146,10 @@ export class FromRule implements Rule {
 			iterable = this.solutions_when_student({ ctx, path });
 		} else if (this.source.mode == "saves") {
 			iterable = this.solutions_when_saves({ ctx, path });
+			throw new Error("from:saves not yet implemented");
 		} else if (this.source.mode == "requirements") {
 			iterable = this.solutions_when_reqs({ ctx, path });
+			throw new Error("from:saves not yet implemented");
 		} else {
 			throw new TypeError(`unknown "from" type "${this.source.mode}"`);
 		}
@@ -182,7 +182,7 @@ export class FromRule implements Rule {
 
 			for (let course_set of this.limit.limited_transcripts(data)) {
 				if (this.action) {
-					for (let n of this.action.range({ items: course_set })) {
+					for (let n of this.action.range(course_set)) {
 						for (let combo of combinations(course_set, n)) {
 							logger.debug(
 								`fromrule/combo/size=${n} of ${

@@ -1,7 +1,8 @@
 import assert from "assert";
-import { loggers } from "winston";
+import { logger } from "./logging";
 import { Decimal } from "decimal.js";
-const logging = loggers.get("degreepath");
+import { CourseRule } from "./rule";
+import { Claim } from "./requirement";
 
 export enum Operator {
 	LessThan = "$lt",
@@ -35,8 +36,9 @@ export function operatorFromString(op: string): Operator {
 }
 
 export interface Clause {
-	mcAppliesSame(other: Clause): boolean;
+	mc_applies_same(other: Clause | CourseRule | Claim): boolean;
 	toString(): string;
+	applies_to(other: any): boolean;
 }
 
 class ClauseTypeError extends TypeError {}
@@ -79,12 +81,16 @@ export class AndClause implements Clause {
 
 	// Checks if this clause applies to the same items as the other clause,
 	// when used as part of a multicountable ruleset.
-	mcAppliesSame(other: Clause): boolean {
-		return this.children.some(clause => clause.mcAppliesSame(other));
+	mc_applies_same(other: Clause | CourseRule | Claim): boolean {
+		return this.children.some(clause => clause.mc_applies_same(other));
 	}
 
 	toString() {
 		return this.children.map(c => c.toString()).join(" and ");
+	}
+
+	applies_to(other: any): boolean {
+		return this.children.every(clause => clause.applies_to(other));
 	}
 }
 
@@ -101,12 +107,16 @@ export class OrClause implements Clause {
 
 	// Checks if this clause applies to the same items as the other clause,
 	// when used as part of a multicountable ruleset.
-	mcAppliesSame(other: Clause): boolean {
-		return this.children.some(clause => clause.mcAppliesSame(other));
+	mc_applies_same(other: Clause | CourseRule | Claim): boolean {
+		return this.children.some(clause => clause.mc_applies_same(other));
 	}
 
 	toString() {
 		return this.children.map(c => c.toString()).join(" or ");
+	}
+
+	applies_to(other: any): boolean {
+		return this.children.some(clause => clause.applies_to(other));
 	}
 }
 
@@ -134,7 +144,7 @@ export class SingleClause implements Clause {
 	}
 
 	compare(to_value: any): boolean {
-		logging.debug(`clause/compare ${to_value} against ${this}`);
+		logger.debug(`clause/compare ${to_value} against ${this}`);
 
 		if (Array.isArray(this.expected) && this.operator != Operator.In) {
 			throw new TypeError(
@@ -148,20 +158,20 @@ export class SingleClause implements Clause {
 
 		if (Array.isArray(to_value)) {
 			if (to_value.length === 0) {
-				logging.debug("clause/compare: skipped (empty to_value)");
+				logger.debug("clause/compare: skipped (empty to_value)");
 				return false;
 			}
 
 			if (to_value.length === 1) {
 				to_value = to_value[0];
 			} else {
-				logging.debug("clause/compare: beginning recursive comparison");
+				logger.debug("clause/compare: beginning recursive comparison");
 				return to_value.some(this.compare);
 			}
 		}
 
 		if (this.operator == Operator.In) {
-			logging.debug("clause/compare/$in: beginning inclusion check");
+			logger.debug("clause/compare/$in: beginning inclusion check");
 			return this.expected.some((v: any) => v === to_value);
 		}
 
@@ -197,7 +207,7 @@ export class SingleClause implements Clause {
 				throw new TypeError(`unknown comparison function ${this.operator}`);
 		}
 
-		logging.debug(
+		logger.debug(
 			`clause/compare: '${expected}' ${this.operator} '${to_value}'; ${result}`,
 		);
 		return result;
@@ -205,9 +215,9 @@ export class SingleClause implements Clause {
 
 	// Checks if this clause applies to the same items as the other clause,
 	// when used as part of a multicountable ruleset.
-	mcAppliesSame(other: Clause): boolean {
+	mc_applies_same(other: Clause | CourseRule | Claim): boolean {
 		if (other instanceof AndClause || other instanceof OrClause) {
-			return other.mcAppliesSame(this);
+			return other.mc_applies_same(this);
 		}
 
 		if (!(other instanceof SingleClause)) {
