@@ -1,11 +1,12 @@
 import { logger } from "../../logging";
-import { Operator } from "../../clause";
+import { Operator, operatorFromString } from "../../clause";
 import assert from "assert";
 import { range } from "../../lib";
 import { RequirementContext } from "../../requirement";
 
 export interface Assertion {
 	apply(value: any): boolean;
+	validate(_: { ctx: RequirementContext }): void;
 }
 
 export function loadAssertion(data: any): Assertion {
@@ -27,6 +28,10 @@ export class AndAssertion implements Assertion {
 		this.children = data.map(loadAssertion);
 	}
 
+	validate({ ctx }: { ctx: RequirementContext }) {
+		this.children.forEach(a => a.validate({ ctx }));
+	}
+
 	apply(value: any) {
 		return this.children.every(child => child.apply(value));
 	}
@@ -37,6 +42,10 @@ export class OrAssertion implements Assertion {
 
 	constructor(data: ReadonlyArray<any>) {
 		this.children = data.map(loadAssertion);
+	}
+
+	validate({ ctx }: { ctx: RequirementContext }) {
+		this.children.forEach(a => a.validate({ ctx }));
 	}
 
 	apply(value: any) {
@@ -77,11 +86,9 @@ export class SingleAssertion {
 
 		let op = valueKeys[0];
 
-		let groups = m.groups();
-
-		this.command = groups[0];
-		this.source = groups[1];
-		this.operator = Operator(op);
+		this.command = m[0] as any;
+		this.source = m[1];
+		this.operator = operatorFromString(op);
 		this.compare_to = val[op];
 	}
 

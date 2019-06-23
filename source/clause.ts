@@ -13,7 +13,7 @@ export enum Operator {
 	In = "$in",
 }
 
-function operatorFromString(op: string): Operator {
+export function operatorFromString(op: string): Operator {
 	switch (op) {
 		case "$lt":
 			return Operator.LessThan;

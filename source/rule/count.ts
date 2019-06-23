@@ -205,14 +205,14 @@ export class CountRule implements Rule {
 					// #     # else selected_original_indices[r],
 					// # )
 
-					yield CountSolution.from_rule({ rule: this, items: solset });
+					yield new CountSolution({ rule: this, items: solset });
 				}
 			}
 		}
 
 		if (!did_iter) {
 			// # ensure that we always yield something
-			yield CountSolution.from_rule({ rule: this, items: this.items });
+			yield new CountSolution({ rule: this, items: this.items });
 		}
 	}
 

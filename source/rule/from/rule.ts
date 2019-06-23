@@ -9,7 +9,6 @@ import { logger } from "../../logging";
 import assert from "assert";
 import { enumerate } from "../../lib";
 import { CourseInstance } from "../../data";
-import { FromSolution } from "../../solution";
 
 export class FromRule implements Rule {
 	readonly source: FromInput;
@@ -101,9 +100,13 @@ export class FromRule implements Rule {
 		ctx: RequirementContext;
 		path: string[];
 	}): IterableIterator<readonly CourseInstance[]> {
-		let saves = this.source.saves.map(s =>
-			ctx.save_rules.get(s).solutions({ ctx, path }),
-		);
+		let saves = this.source.saves.map(s => {
+			let save = ctx.save_rules.get(s);
+			if (!save) {
+				throw new Error(`could not find ${save}`);
+			}
+			return save.solutions({ ctx, path });
+		});
 
 		for (let p of product(...saves)) {
 			yield Array.from(new Set(p.flatMap(save_result => save_result.stored())));
@@ -187,19 +190,19 @@ export class FromRule implements Rule {
 								} :: ${combo.map(String)}`,
 							);
 							did_iter = true;
-							yield FromSolution({ output: combo, rule: this });
+							yield new FromSolution({ output: combo, rule: this });
 						}
 					}
 				}
 				// # also yield one with the entire set of courses
-				yield FromSolution({ output: course_set, rule: this });
+				yield new FromSolution({ output: course_set, rule: this });
 			}
 		}
 
 		if (!did_iter) {
 			// # be sure we always yield something
 			logger.info("did not yield anything; yielding empty collection");
-			yield FromSolution({ output: [], rule: this });
+			yield new FromSolution({ output: [], rule: this });
 		}
 	}
 }

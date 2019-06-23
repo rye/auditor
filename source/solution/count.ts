@@ -36,11 +36,15 @@ export class CountSolution implements Solution {
 		path = [...path, ".of"];
 
 		let results = [...enumerate(this.items)].map(([i, r]) =>
-			r.state() == "solution" ? r.audit({ ctx, path: [...path, i] }) : r,
+			this.isSolution(r) ? r.audit({ ctx, path: [...path, i] }) : r,
 		);
 
 		// # print(this.items)
 
 		return new CountResult({ count: this.count, items: results });
+	}
+
+	isSolution(r: Solution | Rule): r is Solution {
+		return r.state() === "solution";
 	}
 }
