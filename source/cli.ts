@@ -8,7 +8,7 @@ import * as path from "path";
 import { parse as parseYaml } from "yaml";
 
 import prettyMs from "pretty-ms";
-import { AreaOfStudy } from "./area";
+import { AreaOfStudy, AreaSolution } from "./area";
 import { CourseInstance, CourseStatus } from "./data";
 import { Operator } from "./clause";
 
@@ -16,8 +16,22 @@ import { take, sum, intersection, DefaultMap, enumerate } from "./lib";
 
 import yargs from "yargs";
 import { performance } from "perf_hooks";
+import { Rule, CourseRule, CountRule, FromRule, ReferenceRule } from "./rule";
+import {
+	Solution,
+	CourseSolution,
+	CountSolution,
+	FromSolution,
+} from "./solution";
+import { Result, CourseResult, CountResult, FromResult } from "./result";
+import {
+	Requirement,
+	RequirementSolution,
+	RequirementResult,
+} from "./requirement";
 
 type Student = {
+	name: string;
 	stnum: string;
 	courses: readonly any[];
 	degrees: readonly string[];
@@ -240,22 +254,19 @@ function audit(
 		iter_end = performance.now();
 		times.push(iter_end - iter_start);
 
-		// if (args.print_all) {
-		// 	let elapsed = prettyMs((iter_end - start) * 1000);
-		// 	console.log(
-		// 		[
-		// 			...summarize({
-		// 				name: student["name"],
-		// 				stnum: student["stnum"],
-		// 				area: area,
-		// 				result: result,
-		// 				count: total_count,
-		// 				elapsed: elapsed,
-		// 				iterations: times,
-		// 			}),
-		// 		].join(""),
-		// 	);
-		// }
+		if (args.print_all) {
+			let elapsed = prettyMs((iter_end - start) * 1000);
+			let text = summarize({
+				name: student.name,
+				stnum: student.stnum,
+				area: area,
+				result: result,
+				count: total_count,
+				elapsed: elapsed,
+				iterations: times,
+			});
+			console.log([...text].join(""));
+		}
 
 		iter_start = performance.now();
 	}
@@ -272,223 +283,286 @@ function audit(
 	let end = performance.now();
 	let elapsed = prettyMs((end - start) * 1000);
 
-	console.log(JSON.stringify(best_sol));
+	// console.log(JSON.stringify(best_sol));
 
-	// let output = [
-	// 	...summarize({
-	// 		name: student["name"],
-	// 		stnum: student["stnum"],
-	// 		area: area,
-	// 		result: best_sol,
-	// 		count: total_count,
-	// 		elapsed: elapsed,
-	// 		iterations: times,
-	// 	}),
-	// ].join("");
+	if (!best_sol) {
+		console.error("no audits completed");
+		return;
+	}
 
-	// if (args.should_record) {
-	// 	let filename = `${student["stnum"]} ${student["name"]}.txt`;
+	let text = summarize({
+		name: student.name,
+		stnum: student.stnum,
+		area: area,
+		result: best_sol,
+		count: total_count,
+		elapsed: elapsed,
+		iterations: times,
+	});
+	let output = [...text].join("");
 
-	// 	let outdir = "./output";
-	// 	let areadir = area.name.replace("/", "_");
-	// 	let now = new Date();
-	// 	let datestring = `${now.getMonth()} ${now.getDate()}`;
-	// 	areadir = `${areadir} - ${datestring}`;
+	if (args.should_record) {
+		let filename = `${student.stnum} ${student.name}.txt`;
 
-	// 	let ok_path = path.join(outdir, areadir, "ok");
-	// 	makeDir(ok_path);
+		let outdir = "./output";
+		let areadir = area.name.replace("/", "_");
+		let now = new Date();
+		let datestring = `${now.getMonth()} ${now.getDate()}`;
+		areadir = `${areadir} - ${datestring}`;
 
-	// 	let fail_path = path.join(outdir, areadir, "fail");
-	// 	makeDir(fail_path);
+		let ok_path = path.join(outdir, areadir, "ok");
+		makeDir(ok_path);
 
-	// 	let ok = best_sol.ok();
+		let fail_path = path.join(outdir, areadir, "fail");
+		makeDir(fail_path);
 
-	// 	let container = ok ? ok_path : fail_path;
-	// 	let otherpath = path.join(
-	// 		container == ok_path ? ok_path : fail_path,
-	// 		filename,
-	// 	);
+		let ok = best_sol.ok();
 
-	// 	if (existsSync(otherpath)) {
-	// 		unlinkSync(otherpath);
-	// 	}
+		let container = ok ? ok_path : fail_path;
+		let otherpath = path.join(
+			container == ok_path ? ok_path : fail_path,
+			filename,
+		);
 
-	// 	let outpath = path.join(container, filename);
+		if (existsSync(otherpath)) {
+			unlinkSync(otherpath);
+		}
 
-	// 	writeFileSync(outpath, output, { encoding: "utf-8" });
-	// }
+		let outpath = path.join(container, filename);
 
-	// if (args.should_print) {
-	// 	console.log(output);
-	// }
+		writeFileSync(outpath, output, { encoding: "utf-8" });
+	}
+
+	if (args.should_print) {
+		console.log(output);
+	}
 }
 
-/*
-function* summarize({name, stnum, area, result, count, elapsed, iterations}) {
-    let times = iterations
+function* summarize(args: {
+	name: string;
+	stnum: string;
+	area: any;
+	result: Result;
+	count: number;
+	elapsed: string;
+	iterations: readonly number[];
+}) {
+	let { name, stnum, area, result, count, elapsed, iterations } = args;
+	let times = iterations;
 
-    let avg_iter_s = sum(times) / Math.max(times.length, 1)
-    let avg_iter_time = prettyMs(avg_iter_s * 1_000, {formatSubMilliseconds: true, unitCount: 1})
+	let avg_iter_s = sum(times) / Math.max(times.length, 1);
+	let avg_iter_time = prettyMs(avg_iter_s * 1_000, {
+		formatSubMilliseconds: true,
+		unitCount: 1,
+	});
 
-    let endl = "\n"
+	let endl = "\n";
 
-    yield `[#${stnum}] ${name}\'s "${area.name}" ${area.kind}`
+	yield `[#${stnum}] ${name}\'s "${area.name}" ${area.kind}`;
 
-    if (result.ok()) {
-        yield ` audit was successful.`
-    } else {
-        yield ` audit failed.`
-    }
+	if (result.ok()) {
+		yield ` audit was successful.`;
+	} else {
+		yield ` audit failed.`;
+	}
 
-    yield ` (rank {result.rank()})`
+	yield ` (rank {result.rank()})`;
 
-    yield endl
+	yield endl;
 
-    let word = count == 1 ? "attempt" : "attempts"
-    yield `${count} ${word} in ${elapsed} (avg ${avg_iter_time} per attempt)`
-    yield endl
+	let word = count == 1 ? "attempt" : "attempts";
+	yield `${count} ${word} in ${elapsed} (avg ${avg_iter_time} per attempt)`;
+	yield endl;
 
-    yield endl
+	yield endl;
 
-    yield "Results"
-    yield endl
-    yield "======="
+	yield "Results";
+	yield endl;
+	yield "=======";
 
-    yield endl
-    yield endl
+	yield endl;
+	yield endl;
 
-    yield [...print_result(result)].join(endl)
+	yield [...print_result(result)].join(endl);
 
-    yield endl
-    }
-
-
-function* print_result(rule: any, indent=0) {
-    let prefix = " ".repeat(indent)
-
-    if (!rule) {
-        yield `${prefix}???`
-        return
-    }
-
-    let rule_type = rule["type"]
-
-    if (rule_type == "course") {
-        let status = "🌀      "
-        if ("ok" in rule && rule["ok"]) {
-            let claim = rule["claims"][0]["claim"]
-            let course = claim["course"]
-
-            if (course["status"] == CourseStatus.Ok) {
-                status = "💚 [ ok]"
-            }else if (course["status"] == CourseStatus.DidNotComplete) {
-                status = "⛔️ [dnf]"
-            }else if (course["status"] == CourseStatus.InProgress) {
-                status = "💚 [ ip]"
-            }else if (course["status"] == CourseStatus.Repeated) {
-                status = "💚 [rep]"
-            }else if (course["status"] == CourseStatus.NotTaken) {
-                status = "🌀      "
-        }
-
-        yield `${prefix}${status} ${rule['course']}`
-    }
-
-    elif rule_type == "count":
-        if rule["status"] == "pass":
-            emoji = "💚"
-        elif rule["status"] == "skip":
-            emoji = "🌀"
-        else:
-            emoji = "🚫️"
-
-        size = len(rule["items"])
-        if rule["count"] == 1 and size == 2:
-            descr = f"either of (these {size})"
-        elif rule["count"] == 2 and size == 2:
-            descr = f"both of (these {size})"
-        elif rule["count"] == size:
-            descr = f"all of (these {size})"
-        elif rule["count"] == 1:
-            descr = f"any of (these {size})"
-        else:
-            descr = f"{rule['count']} of {size}"
-
-        ok_count = len([r for r in rule["items"] if r["ok"]])
-        descr += f" (ok: {ok_count}; need: {rule['count']})"
-
-        yield f"{prefix}{emoji} {descr}"
-
-        for r in rule["items"]:
-            yield from print_result(r, indent=indent + 4)
-
-    elif rule_type == "from":
-        if rule["status"] == "pass":
-            emoji = "💚"
-        elif rule["status"] == "skip":
-            emoji = "🌀"
-        else:
-            emoji = "🚫️"
-
-        yield f"{prefix}{emoji} Given courses matching {str_clause(rule['where'])}"
-
-        if rule["claims"]:
-            yield f"{prefix} Matching courses:"
-            for c in rule["claims"]:
-                yield f"{prefix}   {c['claim']['course']['shorthand']} \"{c['claim']['course']['name']}\" ({c['claim']['course']['clbid']})"
-
-        if rule["failures"]:
-            yield f"{prefix} Pre-claimed courses which cannot be re-claimed:"
-            for c in rule["failures"]:
-                yield f"{prefix}   {c['claim']['course']['shorthand']} \"{c['claim']['course']['name']}\" ({c['claim']['course']['clbid']})"
-
-        action_desc = ""
-        action = rule["action"]
-        if action["operator"] == Operator.GreaterThanOrEqualTo.name:
-            action_desc = f"at least {action['compare_to']}"
-        elif action["operator"] == Operator.GreaterThan.name:
-            action_desc = f"at least {action['compare_to']}"
-        elif action["operator"] == Operator.LessThanOrEqualTo.name:
-            action_desc = f"at least {action['compare_to']}"
-        elif action["operator"] == Operator.LessThan.name:
-            action_desc = f"at least {action['compare_to']}"
-        elif action["operator"] == Operator.EqualTo.name:
-            action_desc = f"at least {action['compare_to']}"
-
-        if action["source"] == "courses":
-            word = "course" if action["compare_to"] == 1 else "courses"
-        else:
-            word = "items"
-
-        yield f"{prefix} There must be {action_desc} matching {word} (have: {len(rule['claims'])}; need: {action['compare_to']})"
-
-    elif rule_type == "requirement":
-        if rule["status"] == "pass":
-            emoji = "💚"
-        elif rule["status"] == "skip":
-            emoji = "🌀"
-        else:
-            emoji = "🚫️"
-
-        yield f"{prefix}{emoji} Requirement({rule['name']})"
-        if rule["audited_by"] is not None:
-            yield f"{prefix}    Audited by: {rule['audited_by']}; assuming success"
-            return
-        yield from print_result(rule["result"], indent=indent + 4)
-
-    elif rule_type == "reference":
-        if rule["status"] == "pass":
-            emoji = "💚"
-        elif rule["status"] == "skip":
-            emoji = "🌀"
-        else:
-            emoji = "🚫️"
-
-        yield f"{prefix}{emoji} Requirement({rule['name']})"
-        yield f"{prefix}   [Skipped]"
-
-    else:
-        yield json.dumps(rule, indent=2)
+	yield endl;
 }
-*/
+
+function* print_result(
+	rule: Rule | Solution | Result,
+	indent = 0,
+): IterableIterator<string> {
+	let prefix = " ".repeat(indent);
+
+	if (!rule) {
+		yield `${prefix}???`;
+		return;
+	}
+
+	if (
+		rule instanceof CourseRule ||
+		rule instanceof CourseSolution ||
+		rule instanceof CourseResult
+	) {
+		let status = "🌀      ";
+		if (rule.ok()) {
+			let claim = rule.claims()[0].claim;
+			let course = claim.course;
+
+			if (course.status == CourseStatus.Ok) {
+				status = "💚 [ ok]";
+			} else if (course.status == CourseStatus.DidNotComplete) {
+				status = "⛔️ [dnf]";
+			} else if (course.status == CourseStatus.InProgress) {
+				status = "💚 [ ip]";
+			} else if (course.status == CourseStatus.Repeated) {
+				status = "💚 [rep]";
+			} else if (course.status == CourseStatus.NotTaken) {
+				status = "🌀      ";
+			}
+		}
+
+		yield `${prefix}${status} ${rule["course"]}`;
+		return;
+	}
+
+	if (
+		rule instanceof CountRule ||
+		rule instanceof CountSolution ||
+		rule instanceof CountResult
+	) {
+		let emoji;
+		if (rule.status() == "pass") {
+			emoji = "💚";
+		} else if (rule.status() == "skip") {
+			emoji = "🌀";
+		} else {
+			emoji = "🚫️";
+		}
+
+		let size = rule.items.length;
+		let descr;
+		if (rule["count"] == 1 && size == 2) {
+			descr = `either of (these ${size})`;
+		} else if (rule["count"] == 2 && size == 2) {
+			descr = `both of (these ${size})`;
+		} else if (rule["count"] == size) {
+			descr = `all of (these ${size})`;
+		} else if (rule["count"] == 1) {
+			descr = `any of (these ${size})`;
+		} else {
+			descr = `{rule['count']} of {size}`;
+		}
+		let ok_count = rule.items.filter((r: Rule | Result | Solution) => r.ok())
+			.length;
+		descr += ` (ok: ${ok_count}; need: ${rule["count"]})`;
+
+		yield `${prefix}${emoji} ${descr}`;
+
+		for (let r of rule["items"]) {
+			yield* print_result(r, (indent = indent + 4));
+		}
+		return;
+	}
+
+	if (
+		rule instanceof FromRule ||
+		rule instanceof FromSolution ||
+		rule instanceof FromResult
+	) {
+		let emoji;
+		if (rule.status() == "pass") {
+			emoji = "💚";
+		} else if (rule.status() == "skip") {
+			emoji = "🌀";
+		} else {
+			emoji = "🚫️";
+		}
+		yield `${prefix}${emoji} Given courses matching ${rule.where.toString()}`;
+
+		if (rule.claims.length) {
+			yield `${prefix} Matching courses:`;
+			for (let c of rule.claims) {
+				yield `${prefix}   ${c["claim"]["course"]["shorthand"]} \"${c["claim"]["course"]["name"]}\" (${c["claim"]["course"]["clbid"]})`;
+			}
+		}
+
+		if (rule.failures) {
+			yield `${prefix} Pre-claimed courses which cannot be re-claimed:`;
+			for (let c of rule.failures) {
+				yield `${prefix}   ${c["claim"]["course"]["shorthand"]} \"${c["claim"]["course"]["name"]}\" (${c["claim"]["course"]["clbid"]})`;
+			}
+		}
+
+		let action_desc = "";
+		let action = rule.action;
+		if (action.operator == Operator.GreaterThanOrEqualTo) {
+			action_desc = `at least ${action.compare_to}`;
+		} else if (action.operator == Operator.GreaterThan) {
+			action_desc = `at least ${action.compare_to}`;
+		} else if (action.operator == Operator.LessThanOrEqualTo) {
+			action_desc = `at least ${action.compare_to}`;
+		} else if (action.operator == Operator.LessThan) {
+			action_desc = `at least ${action.compare_to}`;
+		} else if (action.operator == Operator.EqualTo) {
+			action_desc = `at least ${action.compare_to}`;
+		}
+
+		let word;
+		if (action["source"] == "courses") {
+			word = action.compare_to == 1 ? "course" : "courses";
+		} else {
+			word = "items";
+		}
+
+		yield `${prefix} There must be ${action_desc} matching ${word} (have: ${rule.claims.length}; need: ${action.compare_to})`;
+		return;
+	}
+
+	if (
+		rule instanceof Requirement ||
+		rule instanceof RequirementSolution ||
+		rule instanceof RequirementResult
+	) {
+		let emoji;
+		if (rule.status() == "pass") {
+			emoji = "💚";
+		} else if (rule.status() == "skip") {
+			emoji = "🌀";
+		} else {
+			emoji = "🚫️";
+		}
+
+		yield `${prefix}${emoji} Requirement(${rule["name"]})`;
+		if (rule["audited_by"] != null) {
+			yield `${prefix}    Audited by: ${rule["audited_by"]}; assuming success`;
+			return;
+		}
+
+		if (rule.result) {
+			yield* print_result(rule.result, indent + 4);
+		} else {
+			yield "(no rule is present for this requirement)";
+		}
+		return;
+	}
+
+	if (rule instanceof ReferenceRule) {
+		let emoji;
+		if (rule.status() == "pass") {
+			emoji = "💚";
+		} else if (rule.status() == "skip") {
+			emoji = "🌀";
+		} else {
+			emoji = "🚫️";
+		}
+
+		yield `${prefix}${emoji} Requirement(${rule["name"]})`;
+		yield `${prefix}   [Skipped]`;
+		return;
+	}
+
+	yield JSON.stringify(rule, null, 2);
+}
+
 main();

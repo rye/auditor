@@ -1,5 +1,5 @@
 import { CourseRule } from "../rule";
-import { CourseResult } from "../result";
+import { CourseResult, Result } from "../result";
 import { RequirementContext } from "../requirement";
 import { Solution } from "./interface";
 import { logger } from "../logging";
@@ -29,7 +29,7 @@ export class CourseSolution implements Solution {
 		return false;
 	}
 
-	audit({ ctx, path }: { ctx: RequirementContext; path: string[] }) {
+	audit({ ctx, path }: { ctx: RequirementContext; path: string[] }): Result {
 		path = [...path, `$c->${this.course}`];
 
 		let matched_course = ctx.find_course(this.course);

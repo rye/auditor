@@ -33,7 +33,7 @@ const SHORTHANDS = new Map(
 	}),
 );
 
-export function* expand_subjects(subjects: string[]) {
+export function* expand_subjects(subjects: readonly string[]) {
 	for (let subject of subjects) {
 		for (let code of subject.split("/")) {
 			yield SHORTHANDS.get(code) || code;
@@ -67,7 +67,7 @@ export class DefaultMap<K, V> extends Map<K, V> {
 	}
 
 	constructor(entries: ReadonlyArray<[K, V]> | null, init: () => V) {
-		super();
+		super(entries);
 		this.initFn = init;
 	}
 
@@ -79,8 +79,8 @@ export class DefaultMap<K, V> extends Map<K, V> {
 	}
 }
 
-export function sum(iter: number[]) {
-	return iter.reduce((acc, v) => acc + v, 0);
+export function sum(iter: Iterable<number>) {
+	return [...iter].reduce((acc, v) => acc + v, 0);
 }
 
 export function* range(start: number, end: number) {
@@ -89,14 +89,14 @@ export function* range(start: number, end: number) {
 	}
 }
 
-export function difference<T>(a: Set<T>, b: Set<T>) {
+export function difference<T>(a: ReadonlySet<T>, b: ReadonlySet<T>) {
 	return new Set([...a].filter(x => !b.has(x)));
 }
 
-export function union<T>(a: Set<T>, b: Set<T>) {
+export function union<T>(a: ReadonlySet<T>, b: ReadonlySet<T>) {
 	return new Set([...a, ...b]);
 }
 
-export function intersection<T>(a: Set<T>, b: Set<T>) {
+export function intersection<T>(a: ReadonlySet<T>, b: ReadonlySet<T>) {
 	return new Set([...a].filter(x => b.has(x)));
 }

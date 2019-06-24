@@ -76,13 +76,11 @@ export class FromSolution implements Solution {
 		return Number.isFinite(items[0] as number);
 	}
 
-	audit_when_student({
-		ctx,
-		path,
-	}: {
+	audit_when_student(args: {
 		ctx: RequirementContext;
 		path: string[];
 	}): Result {
+		let { ctx, path } = args;
 		let successful_claims = [];
 		let failed_claims = [];
 

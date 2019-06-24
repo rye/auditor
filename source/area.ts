@@ -6,6 +6,7 @@ import { RequirementContext, Requirement } from "./requirement";
 import { Solution } from "./solution";
 import { logger } from "./logging";
 import { Rule, CourseRule, loadRule } from "./rule";
+import { Result } from "./result";
 
 class InvalidMulticountable extends TypeError {}
 
@@ -133,7 +134,7 @@ export class AreaSolution {
 		this.area = area;
 	}
 
-	audit({ transcript }: { transcript: CourseInstance[] }) {
+	audit({ transcript }: { transcript: readonly CourseInstance[] }): Result {
 		let path = ["$root"];
 		logger.debug("auditing area.result", { path });
 
