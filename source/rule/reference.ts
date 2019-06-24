@@ -38,7 +38,7 @@ export class ReferenceRule implements Rule {
 		return false;
 	}
 
-	static can_load(data: any): boolean {
+	static can_load(data: object): boolean {
 		if ("requirement" in data) {
 			return true;
 		}

@@ -82,14 +82,13 @@ export class FromRule implements Rule {
 		}
 	}
 
-	*solutions_when_student({
-		ctx,
-		path,
-	}: {
+	*solutions_when_student(args: {
 		ctx: RequirementContext;
 		path: string[];
 	}): IterableIterator<readonly CourseInstance[]> {
-		let data;
+		let { ctx, path } = args;
+
+		let data: readonly CourseInstance[];
 		if (this.source.itemtype == "courses") {
 			data = ctx.transcript;
 
@@ -99,6 +98,7 @@ export class FromRule implements Rule {
 				for (let course of data) {
 					if (!course_identities.has(course.identity)) {
 						filtered_courses.push(course);
+						course_identities.add(course.identity);
 					}
 				}
 				data = filtered_courses;
@@ -146,13 +146,12 @@ export class FromRule implements Rule {
 		}
 	}
 
-	*solutions({
-		ctx,
-		path,
-	}: {
+	*solutions(args: {
 		ctx: RequirementContext;
 		path: string[];
 	}): IterableIterator<FromSolution> {
+		let { ctx, path } = args;
+
 		path = [...path, ".from"];
 		logger.debug(path);
 

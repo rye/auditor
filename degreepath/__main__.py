@@ -71,7 +71,9 @@ def main(*, student_file, print_every, loglevel, record, stream, area_files, pri
         elif set(data["concentrations"]).intersection(allowed["concentration"]):
             students.append(data)
         else:
-            print(f'skipping student {file} as their majors/degrees/concentrations were not loaded')
+            print(
+                f"skipping student {file} as their majors/degrees/concentrations were not loaded"
+            )
 
     run(
         students=students,
@@ -88,7 +90,7 @@ def run(
     *, students, areas, allowed, print_every, should_record, should_print, print_all
 ):
     if not students:
-        print('no students to process')
+        print("no students to process")
 
     for i, student in enumerate(students):
         transcript = []
@@ -111,7 +113,9 @@ def run(
         conc_names = set(student["concentrations"])
         allowed_conc_names = conc_names.intersection(allowed["concentration"])
 
-        allowed_area_names = allowed_major_names | allowed_conc_names | allowed_degree_names
+        allowed_area_names = (
+            allowed_major_names | allowed_conc_names | allowed_degree_names
+        )
 
         for area_name in allowed_area_names:
             area_def = next(a for a in areas if a["name"] == area_name)
@@ -312,6 +316,7 @@ def print_result(rule, indent=0):
     prefix = " " * indent
 
     # print(json.dumps(rule, indent=2))
+    prefix = f"{prefix} [rank={rule['rank']}] "
 
     if rule is None:
         yield f"{prefix}???"

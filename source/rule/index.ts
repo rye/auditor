@@ -19,6 +19,6 @@ export function loadRule(data: any): Rule {
 	}
 
 	throw new TypeError(
-		`expected Course, Given, Count, Both, Either, or Do; found none of those (${data})`,
+		`expected Course, Given, Count, Both, Either, or Do; found none of those (${JSON.stringify(data)})`,
 	);
 }
