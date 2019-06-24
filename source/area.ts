@@ -14,7 +14,7 @@ export class AreaOfStudy {
 	readonly type = "area";
 	readonly name: string;
 	readonly kind: string;
-	readonly degree: string;
+	readonly degree?: string;
 	readonly catalog: string;
 
 	readonly limit: Limit[];
@@ -81,8 +81,10 @@ export class AreaOfStudy {
 
 		if (this.kind !== "degree") {
 			assert(typeof this.degree === "string");
-			assert(this.degree.trim() != "");
-			assert(["Bachelor of Arts", "Bachelor of Music"].includes(this.degree));
+			assert(this.degree && this.degree.trim() != "");
+			assert(
+				["Bachelor of Arts", "Bachelor of Music"].includes(this.degree as any),
+			);
 		}
 
 		let ctx = new RequirementContext({
