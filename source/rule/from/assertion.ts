@@ -162,13 +162,16 @@ export class SingleAssertion {
 				break;
 			case "sum":
 				assert(["grades", "credits"].includes(this.source));
+				break;
 			case "average":
 				assert(["grades", "credits"].includes(this.source));
+				break;
 			case "minimum":
 			case "maximum":
 				assert(
 					["terms", "semesters", "grades", "credits"].includes(this.source),
 				);
+				break;
 			case "stored":
 				// # TODO: assert that the stored lookup exists
 				break;
