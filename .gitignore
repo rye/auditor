@@ -13,3 +13,4 @@ __pycache__/
 /.tsincrinfo
 /build
 /*.log
+/report*.json
