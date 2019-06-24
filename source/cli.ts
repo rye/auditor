@@ -82,45 +82,22 @@ function getArgs() {
 function main() {
 	let args = getArgs();
 
-	let areas = [];
-	let allowed: DefaultMap<string, Set<string>> = DefaultMap.empty(
-		() => new Set(),
-	);
-
-	for (let f of args.area) {
+	let areas = args.area.map(f => {
 		let text = readFileSync(f, { encoding: "utf-8" });
-		let a = parseYaml(text);
-		areas.push(a);
-		allowed.get(a["type"]).add(a["name"]);
-	}
+		return parseYaml(text);
+	});
 
-	let students = [];
-	for (let f of args.student) {
+	let students = args.student.map(f => {
 		let text = readFileSync(f, { encoding: "utf-8" });
-		let s = JSON.parse(text);
+		return JSON.parse(text);
+	});
 
-		if (intersection(new Set(s["degrees"]), allowed.get("degree"))) {
-			students.push(s);
-		} else if (intersection(new Set(s["majors"]), allowed.get("major"))) {
-			students.push(s);
-		} else if (
-			intersection(new Set(s["concentrations"]), allowed.get("concentration"))
-		) {
-			students.push(s);
-		} else {
-			console.warn(
-				`skipping student ${f} as their majors/degrees/concentrations were not loaded`,
-			);
-		}
-	}
-
-	run(students, areas, allowed, args);
+	run(students, areas, args);
 }
 
 function run(
 	students: Student[],
 	areas: any[],
-	allowed: DefaultMap<string, Set<string>>,
 	args: ReturnType<typeof getArgs>,
 ) {
 	if (!students.length) {
@@ -136,30 +113,7 @@ function run(
 			}
 		}
 
-		let degree_names = new Set(student["degrees"]);
-		let allowed_degree_names = intersection(
-			degree_names,
-			allowed.get("degree"),
-		);
-
-		let major_names = new Set(student["majors"]);
-		let allowed_major_names = intersection(major_names, allowed.get("major"));
-
-		let conc_names = new Set(student["concentrations"]);
-		let allowed_conc_names = intersection(
-			conc_names,
-			allowed.get("concentration"),
-		);
-
-		let allowed_area_names = new Set([
-			...allowed_major_names,
-			...allowed_conc_names,
-			...allowed_degree_names,
-		]);
-
-		for (let area_name of allowed_area_names) {
-			let area_def = areas.find(a => a.name == area_name);
-
+		for (let area_def of areas) {
 			audit(student, area_def, transcript, args);
 		}
 	}
@@ -171,7 +125,9 @@ function audit(
 	transcript: CourseInstance[],
 	args: ReturnType<typeof getArgs>,
 ) {
-	console.error(`auditing #${student["stnum"]}"`);
+	console.error(
+		`auditing #${student["stnum"]} against the ${area_def.catalog} "${area_def.name}" ${area_def.type}`,
+	);
 
 	let area = new AreaOfStudy(area_def);
 
@@ -364,6 +320,7 @@ function* print_result(
 	indent = 0,
 ): IterableIterator<string> {
 	let prefix = " ".repeat(indent);
+	prefix = `${prefix} [rank=${rule.rank()}] `;
 
 	if (!rule) {
 		yield `${prefix}???`;
