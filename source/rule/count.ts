@@ -176,26 +176,32 @@ export class CountRule implements Rule {
 					// # print("solset", solutionset)
 
 					// # todo: clean up this block
-					let req_ident_map: Map<number, number> = new Map();
+					let req_ident_map: Map<string, number> = new Map();
 					let do_not_yield = false;
 
 					let cleaned: Solution[] = [];
 
 					for (let rulesol of solutionset) {
-						let solution;
-						if (Array.isArray(rulesol)) {
-							let [req_ident, req_idx] = rulesol[0];
+						let solution = rulesol;
 
-							req_ident_map.set(req_ident, req_idx);
+						if (Array.isArray(rulesol)) {
+							let [identity, sol]: [
+								[string, number],
+								Solution,
+							] = rulesol as any;
+
+							let [req_ident, req_idx] = identity;
+
+							if (!req_ident_map.has(req_ident)) {
+								req_ident_map.set(req_ident, req_idx);
+							}
 
 							if (req_ident_map.get(req_ident) != req_idx) {
 								do_not_yield = true;
 								break;
 							}
 
-							solution = rulesol[1];
-						} else {
-							solution = rulesol;
+							solution = sol;
 						}
 
 						cleaned.push(solution);
