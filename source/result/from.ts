@@ -51,8 +51,15 @@ export class FromResult implements Result {
 
 	rank() {
 		// TODO: fix this calculation so that it properly handles #154647's audit
+		// this.rule.action &&
+		// 	console.log(
+		// 		"max value",
+		// 		this.rule.action.get_max_value(),
+		// 		"min value",
+		// 		this.rule.action.get_min_value(),
+		// 	);
 		return Math.min(
-			this.successful_claims.length + this.failed_claims.length,
+			this.successful_claims.length, // + this.failed_claims.length,
 			this.rule.action ? (this.rule.action.get_max_value() as number) : 0,
 		);
 	}
