@@ -61,19 +61,19 @@ export class FromSolution implements Solution {
 	}
 
 	isCourseOutput(items: FromOutput): items is readonly CourseInstance[] {
-		return items[0] instanceof CourseInstance;
+		return !items.length || items[0] instanceof CourseInstance;
 	}
 
 	isDecimalOutput(items: FromOutput): items is readonly Decimal[] {
-		return items[0] instanceof Decimal;
+		return !items.length || items[0] instanceof Decimal;
 	}
 
 	isTermOutput(items: FromOutput): items is readonly Term[] {
-		return items[0] instanceof Term;
+		return !items.length || items[0] instanceof Term;
 	}
 
 	isNumberOutput(items: FromOutput): items is readonly number[] {
-		return Number.isFinite(items[0] as number);
+		return !items.length || Number.isFinite(items[0] as number);
 	}
 
 	audit_when_student(args: {
@@ -97,6 +97,7 @@ export class FromSolution implements Solution {
 		}
 
 		if (!this.isCourseOutput(this.output)) {
+			console.log(this.output);
 			throw new Error("expected to operate on courses");
 		}
 

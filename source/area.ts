@@ -26,8 +26,8 @@ export class AreaOfStudy {
 	constructor(data: any) {
 		assert(data.name != null);
 		this.name = data.name;
-		assert(data.kind != null);
-		this.kind = data.kind;
+		assert(data.type != null);
+		this.kind = data.type;
 		assert(data.degree != null);
 		this.degree = data.degree;
 		assert(data.catalog != null);
@@ -39,7 +39,7 @@ export class AreaOfStudy {
 		);
 		this.requirements = new Map(requirements);
 
-		assert(data.rule != null);
+		assert(data.result != null);
 		this.result = loadRule(data.result);
 
 		let limits: any[] = Array.isArray(data.limit) ? data.limit : [];
@@ -79,7 +79,7 @@ export class AreaOfStudy {
 		if (this.kind !== "degree") {
 			assert(typeof this.degree === "string");
 			assert(this.degree.trim() != "");
-			assert(this.degree in ["Bachelor of Arts", "Bachelor of Music"]);
+			assert(["Bachelor of Arts", "Bachelor of Music"].includes(this.degree));
 		}
 
 		let ctx = new RequirementContext({
@@ -91,7 +91,7 @@ export class AreaOfStudy {
 		this.result.validate({ ctx });
 	}
 
-	*solutions({ transcript }: { transcript: CourseInstance[] }) {
+	*solutions({ transcript }: { transcript: readonly CourseInstance[] }) {
 		let path = ["$root"];
 		logger.debug("evaluating area.result", { path });
 

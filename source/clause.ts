@@ -31,7 +31,7 @@ export function operatorFromString(op: string): Operator {
 		case "$in":
 			return Operator.In;
 		default:
-			throw new TypeError(`${op} is not a valid operator`);
+			throw new TypeError(`"${op}" is not a valid operator`);
 	}
 }
 
@@ -42,7 +42,9 @@ export interface Clause {
 }
 
 class ClauseTypeError extends TypeError {}
-export function loadClause(data: any): Clause {
+export function loadClause(
+	data: object | { $and: object[] } | { $or: object[] },
+): Clause {
 	if (Object.is(data, Object)) {
 		throw new ClauseTypeError(
 			`expected ${JSON.stringify(data)} to be a dictionary`,
@@ -57,7 +59,7 @@ export function loadClause(data: any): Clause {
 		return new OrClause(data["$or"]);
 	} else {
 		let clauses = Object.entries(data).map(([key, value]: [string, any]) => {
-			return new SingleClause(key, data);
+			return new SingleClause(key, value);
 		});
 
 		if (clauses.length === 1) {

@@ -231,12 +231,12 @@ export class ClaimAttempt {
 }
 
 export class RequirementState {
-	done: boolean = false;
-	vals: Array<any> = [];
-	iter: any;
+	private done: boolean = false;
+	private vals: Array<any> = [];
+	private readonly iter: Iterable<any>;
 
 	constructor(iterable: Iterable<any>) {
-		// self.iter = iter(iterable)
+		this.iter = iterable;
 		this.done = false;
 		this.vals = [];
 	}

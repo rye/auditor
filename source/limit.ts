@@ -4,7 +4,7 @@ import { Clause, loadClause } from "./clause";
 import { enumerate } from "./lib";
 import { CourseInstance } from "./data";
 
-type RawLimit = { at_most: number; where: number };
+type RawLimit = { at_most: number; where: object };
 
 export class Limit {
 	readonly at_most: number;

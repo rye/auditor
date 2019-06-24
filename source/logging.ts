@@ -13,6 +13,7 @@ if (process.env.NODE_ENV !== "production") {
 	winstonTransports.push(
 		new transports.Console({
 			format: format.combine(format.colorize(), format.simple()),
+			level: "warn",
 		}),
 	);
 }

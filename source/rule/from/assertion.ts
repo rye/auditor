@@ -120,7 +120,7 @@ export class SingleAssertion {
 	constructor(data: any) {
 		let keys = Object.keys(data);
 
-		assert(keys.length == 1);
+		assert(keys.length == 1, "expected exactly one key");
 
 		let rex = /(count|sum|minimum|maximum|stored|average)\((.*)\)/;
 
@@ -138,8 +138,8 @@ export class SingleAssertion {
 
 		let op = valueKeys[0];
 
-		this.command = m[0] as any;
-		this.source = m[1];
+		this.command = m[1] as any;
+		this.source = m[2];
 		this.operator = operatorFromString(op);
 		this.compare_to = val[op];
 	}
@@ -149,7 +149,7 @@ export class SingleAssertion {
 			["count", "sum", "minimum", "maximum", "stored", "average"].includes(
 				this.command,
 			),
-			`${this.command}`,
+			`expected "${this.command}" to match "count", "sum", "minimum", "maximum", "stored", "average"`,
 		);
 
 		switch (this.command) {

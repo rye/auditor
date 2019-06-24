@@ -39,9 +39,8 @@ type Student = {
 	concentrations: readonly string[];
 };
 
-// Audits a student against their areas of study.
-function main() {
-	let args = yargs
+function getArgs() {
+	return yargs
 		.scriptName("degreepath")
 		.usage("Usage: $0 [options] <student> --area <area-file>")
 		.strict()
@@ -92,16 +91,11 @@ function main() {
 			type: "array",
 			describe: "Path(s) to the students(s) to audit",
 		}).argv;
+}
 
-	// if (args.loglevel == "warn"):
-	//     logger.setLevel(logging.WARNING)
-	//     coloredlogs.install(level="WARNING", logger=logger, fmt=logformat)
-	// elif loglevel.lower() == "debug":
-	//     logger.setLevel(logging.DEBUG)
-	//     coloredlogs.install(level="DEBUG", logger=logger, fmt=logformat)
-	// elif loglevel.lower() == "info":
-	//     logger.setLevel(logging.INFO)
-	//     coloredlogs.install(level="INFO", logger=logger, fmt=logformat)
+// Audits a student against their areas of study.
+function main() {
+	let args = getArgs();
 
 	let areas = [];
 	let allowed: DefaultMap<string, Set<string>> = DefaultMap.empty(
@@ -141,7 +135,7 @@ function run(
 	students: Student[],
 	areas: any[],
 	allowed: DefaultMap<string, Set<string>>,
-	args: any,
+	args: ReturnType<typeof getArgs>,
 ) {
 	if (!students.length) {
 		console.error("no students to process");
@@ -156,42 +150,31 @@ function run(
 			}
 		}
 
-		let degree_names: Set<string> = new Set(student["degrees"]);
-		let allowed_degree_names: Set<string> = intersection(
+		let degree_names = new Set(student["degrees"]);
+		let allowed_degree_names = intersection(
 			degree_names,
 			allowed.get("degree"),
 		);
 
-		let major_names: Set<string> = new Set(student["majors"]);
-		let allowed_major_names: Set<string> = intersection(
-			major_names,
-			allowed.get("major"),
-		);
+		let major_names = new Set(student["majors"]);
+		let allowed_major_names = intersection(major_names, allowed.get("major"));
 
-		let conc_names: Set<string> = new Set(student["concentrations"]);
-		let allowed_conc_names: Set<string> = intersection(
+		let conc_names = new Set(student["concentrations"]);
+		let allowed_conc_names = intersection(
 			conc_names,
 			allowed.get("concentration"),
 		);
 
-		// TODO
-		let allowed_area_names: Array<string> = Array.from(
-			new Set([
-				...allowed_major_names,
-				...allowed_conc_names,
-				...allowed_degree_names,
-			]),
-		);
+		let allowed_area_names = new Set([
+			...allowed_major_names,
+			...allowed_conc_names,
+			...allowed_degree_names,
+		]);
 
 		for (let area_name of allowed_area_names) {
-			let area_def = areas.find(a => a["name"] == area_name);
+			let area_def = areas.find(a => a.name == area_name);
 
-			audit(
-				(student = student),
-				(area_def = area_def),
-				(transcript = transcript),
-				args,
-			);
+			audit(student, area_def, transcript, args);
 		}
 	}
 }
@@ -200,7 +183,7 @@ function audit(
 	student: Student,
 	area_def: any,
 	transcript: CourseInstance[],
-	args: any,
+	args: ReturnType<typeof getArgs>,
 ) {
 	console.error(`auditing #${student["stnum"]}"`);
 
@@ -231,7 +214,7 @@ function audit(
 	for (let sol of area.solutions({ transcript: this_transcript })) {
 		total_count += 1;
 
-		if (total_count % args.print_every == 0) {
+		if (total_count % args["print-every"] === 0) {
 			console.error(`... ${total_count}`);
 		}
 
@@ -254,7 +237,7 @@ function audit(
 		iter_end = performance.now();
 		times.push(iter_end - iter_start);
 
-		if (args.print_all) {
+		if (args["print-all"]) {
 			let elapsed = prettyMs((iter_end - start) * 1000);
 			let text = summarize({
 				name: student.name,
@@ -276,12 +259,12 @@ function audit(
 		return;
 	}
 
-	if (args.should_print && !args.json) {
+	if (args.print && !args.json) {
 		console.log();
 	}
 
 	let end = performance.now();
-	let elapsed = prettyMs((end - start) * 1000);
+	let elapsed = prettyMs(end - start);
 
 	// console.log(JSON.stringify(best_sol));
 
@@ -301,7 +284,7 @@ function audit(
 	});
 	let output = [...text].join("");
 
-	if (args.should_record) {
+	if (args.record) {
 		let filename = `${student.stnum} ${student.name}.txt`;
 
 		let outdir = "./output";
@@ -311,10 +294,10 @@ function audit(
 		areadir = `${areadir} - ${datestring}`;
 
 		let ok_path = path.join(outdir, areadir, "ok");
-		makeDir(ok_path);
+		makeDir.sync(ok_path);
 
 		let fail_path = path.join(outdir, areadir, "fail");
-		makeDir(fail_path);
+		makeDir.sync(fail_path);
 
 		let ok = best_sol.ok();
 
@@ -333,7 +316,7 @@ function audit(
 		writeFileSync(outpath, output, { encoding: "utf-8" });
 	}
 
-	if (args.should_print) {
+	if (args.print) {
 		console.log(output);
 	}
 }
@@ -346,12 +329,12 @@ function* summarize(args: {
 	count: number;
 	elapsed: string;
 	iterations: readonly number[];
-}) {
+}): Iterable<string> {
 	let { name, stnum, area, result, count, elapsed, iterations } = args;
 	let times = iterations;
 
 	let avg_iter_s = sum(times) / Math.max(times.length, 1);
-	let avg_iter_time = prettyMs(avg_iter_s * 1_000, {
+	let avg_iter_time = prettyMs(avg_iter_s, {
 		formatSubMilliseconds: true,
 		unitCount: 1,
 	});
@@ -383,11 +366,14 @@ function* summarize(args: {
 	yield endl;
 	yield endl;
 
-	yield [...print_result(result)].join(endl);
+	// yield [...print_result(result)].join(endl);
+
+	yield JSON.stringify(result);
 
 	yield endl;
 }
 
+/*
 function* print_result(
 	rule: Rule | Solution | Result,
 	indent = 0,
@@ -478,6 +464,7 @@ function* print_result(
 		} else {
 			emoji = "🚫️";
 		}
+
 		yield `${prefix}${emoji} Given courses matching ${rule.where.toString()}`;
 
 		if (rule.claims.length) {
@@ -564,5 +551,6 @@ function* print_result(
 
 	yield JSON.stringify(rule, null, 2);
 }
+*/
 
 main();
