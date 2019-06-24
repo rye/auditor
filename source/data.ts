@@ -223,7 +223,7 @@ export function loadCourse(data: { [key: string]: any }) {
 	Decimal.set({ rounding: roundMode });
 
 	let subject = subjects != null ? subjects : [course.split(" ")[0]];
-	subject = expand_subjects(subject);
+	subject = [...expand_subjects(subject)];
 	// we want to keep the original shorthand course identity for matching purposes
 
 	number = number != null ? number : course.split(" ")[1];
@@ -240,14 +240,14 @@ export function loadCourse(data: { [key: string]: any }) {
 	let course_identity = null;
 	let course_identity_short = null;
 	if (is_lab) {
-		course_identity = "{'/'.join(subject)} {number}.L";
-		course_identity_short = "{'/'.join(subjects)} {number}.L";
+		course_identity = `${subject.join("/")} ${number}.L`;
+		course_identity_short = `${subjects.join("/")} ${number}.L`;
 	} else if (is_flac) {
-		course_identity = "{'/'.join(subject)} {number}.F";
-		course_identity_short = "{'/'.join(subjects)} {number}.F";
+		course_identity = `${subject.join("/")} ${number}.F`;
+		course_identity_short = `${subjects.join("/")} ${number}.F`;
 	} else {
-		course_identity = "{'/'.join(subject)} {number}";
-		course_identity_short = "{'/'.join(subjects)} {number}";
+		course_identity = `${subject.join("/")} ${number}`;
+		course_identity_short = `${subjects.join("/")} ${number}`;
 	}
 
 	return new CourseInstance({
