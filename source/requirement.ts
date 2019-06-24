@@ -575,7 +575,7 @@ export class RequirementResult implements Result {
 			return 0;
 		}
 
-		let boost = this.ok ? 1 : 0;
+		let boost = this.ok() ? 1 : 0;
 		return this.result.rank() + boost;
 	}
 }
