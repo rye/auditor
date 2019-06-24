@@ -71,6 +71,7 @@ export function loadClause(
 }
 
 export class AndClause implements Clause {
+	readonly type = "and-clause";
 	readonly children: ReadonlyArray<Clause> = [];
 
 	constructor(data: any[]) {
@@ -97,6 +98,7 @@ export class AndClause implements Clause {
 }
 
 export class OrClause implements Clause {
+	readonly type = "or-clause";
 	readonly children: ReadonlyArray<Clause> = [];
 
 	constructor(data: any[]) {
@@ -123,6 +125,7 @@ export class OrClause implements Clause {
 }
 
 export class SingleClause implements Clause {
+	readonly type = "single-clause";
 	readonly key: string;
 	readonly expected: any;
 	readonly operator: Operator;

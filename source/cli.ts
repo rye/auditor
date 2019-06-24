@@ -349,12 +349,12 @@ function* summarize(args: {
 		yield ` audit failed.`;
 	}
 
-	yield ` (rank {result.rank()})`;
+	yield ` (rank ${result.rank()})`;
 
 	yield endl;
 
 	let word = count == 1 ? "attempt" : "attempts";
-	yield `${count} ${word} in ${elapsed} (avg ${avg_iter_time} per attempt)`;
+	yield `${count} ${word} in ${elapsed} (${avg_iter_time} per attempt)`;
 	yield endl;
 
 	yield endl;
@@ -368,7 +368,7 @@ function* summarize(args: {
 
 	// yield [...print_result(result)].join(endl);
 
-	yield JSON.stringify(result);
+	yield JSON.stringify(result, null, 2);
 
 	yield endl;
 }

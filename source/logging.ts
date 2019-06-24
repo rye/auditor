@@ -1,10 +1,10 @@
 import { format, transports, loggers } from "winston";
 
 let winstonTransports: any[] = [
-	// - Write to all logs with level `info` and below to `combined.log`
-	new transports.File({ filename: "quick-start-error.log", level: "error" }),
 	// - Write all logs error (and below) to `error.log`.
-	new transports.File({ filename: "quick-start-combined.log" }),
+	new transports.File({ filename: "quick-start-error.log", level: "error" }),
+	// - Write to all logs with level `info` and below to `combined.log`
+	// new transports.File({ filename: "quick-start-combined.log" }),
 ];
 
 // If we're not in production then **ALSO** log to the `console`

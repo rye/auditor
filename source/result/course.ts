@@ -3,6 +3,7 @@ import { CourseRule } from "../rule";
 import { ClaimAttempt } from "../requirement";
 
 export class CourseResult implements Result {
+	readonly type = "course";
 	readonly course: string;
 	readonly rule: CourseRule;
 	readonly claim_attempt: null | ClaimAttempt = null;
@@ -15,6 +16,17 @@ export class CourseResult implements Result {
 		this.course = args.course;
 		this.rule = args.rule;
 		this.claim_attempt = args.claim_attempt || null;
+	}
+
+	toJSON() {
+		return {
+			...this.rule.toJSON(),
+			state: this.state(),
+			status: this.ok() ? "pass" : "skip",
+			ok: this.ok(),
+			rank: this.rank(),
+			claims: this.claims(),
+		};
 	}
 
 	claims() {

@@ -13,4 +13,13 @@ export interface Rule {
 	claims(): ReadonlyArray<ClaimAttempt>;
 	rank(): 0;
 	ok(): boolean;
+
+	toJSON(): {
+		type: string;
+		state: string;
+		status: string;
+		ok: boolean;
+		rank: number;
+		claims: readonly ClaimAttempt[];
+	};
 }

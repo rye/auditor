@@ -14,12 +14,28 @@ export type FromOutput =
 	| readonly number[];
 
 export class FromSolution implements Solution {
+	readonly type = "from";
 	readonly output: FromOutput;
 	readonly rule: FromRule;
 
 	constructor({ rule, output }: { rule: FromRule; output: FromOutput }) {
 		this.rule = rule;
 		this.output = output;
+	}
+
+	toJSON() {
+		return {
+			type: "from",
+			source: this.rule.source,
+			action: this.rule.action,
+			where: this.rule.where,
+			output: this.output,
+			state: this.state(),
+			status: "pending",
+			ok: this.ok(),
+			rank: this.rank(),
+			claims: this.claims(),
+		};
 	}
 
 	state(): "solution" {

@@ -5,12 +5,25 @@ import { Solution } from "./interface";
 import { logger } from "../logging";
 
 export class CourseSolution implements Solution {
+	readonly type = "course";
 	readonly course: string;
 	readonly rule: CourseRule;
 
 	constructor({ course, rule }: { course: string; rule: CourseRule }) {
 		this.course = course;
 		this.rule = rule;
+	}
+
+	toJSON() {
+		return {
+			...this.rule.toJSON(),
+			type: "count",
+			state: this.state(),
+			status: "pending",
+			rank: this.rank(),
+			ok: this.ok(),
+			claims: this.claims(),
+		};
 	}
 
 	state(): "solution" {

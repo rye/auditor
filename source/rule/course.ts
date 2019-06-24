@@ -8,6 +8,7 @@ import { CourseInstance } from "../data";
 import { Rule } from "./interface";
 
 export class CourseRule implements Rule {
+	readonly type = "course";
 	readonly course: string;
 	readonly hidden: boolean;
 	readonly grade: string | null;
@@ -24,6 +25,21 @@ export class CourseRule implements Rule {
 		this.hidden = hidden;
 		this.grade = grade;
 		this.allow_claimed = allow_claimed;
+	}
+
+	toJSON() {
+		return {
+			type: this.type,
+			course: this.course,
+			hidden: this.hidden,
+			grade: this.grade,
+			allow_claimed: this.allow_claimed,
+			state: this.state(),
+			status: this.ok() ? "pass" : "skip",
+			ok: this.ok(),
+			rank: this.rank(),
+			claims: this.claims(),
+		};
 	}
 
 	state(): "rule" {

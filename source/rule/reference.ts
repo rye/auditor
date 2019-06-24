@@ -3,10 +3,23 @@ import { RequirementContext, RequirementState } from "../requirement";
 import { Rule } from "./interface";
 
 export class ReferenceRule implements Rule {
+	readonly type = "reference";
 	readonly name: string;
 
 	constructor(name: string) {
 		this.name = name;
+	}
+
+	toJSON() {
+		return {
+			type: "reference",
+			name: this.name,
+			status: "skip",
+			state: this.state(),
+			ok: this.ok(),
+			rank: this.rank(),
+			claims: this.claims(),
+		};
 	}
 
 	state(): "rule" {

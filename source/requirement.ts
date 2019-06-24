@@ -71,12 +71,7 @@ export class RequirementContext {
 		this.claims = DefaultMap.empty(() => new Set());
 	}
 
-	make_claim({
-		crsid,
-		course,
-		path,
-		clause,
-	}: {
+	make_claim(args: {
 		crsid: string;
 		course: CourseInstance;
 		path: string[];
@@ -101,6 +96,8 @@ export class RequirementContext {
 		//     then the claim is recorded, and succeeds.
 		//
 		// Otherwise, the claim is rejected, with a list of the prior confirmed claims.
+
+		let { crsid, course, path, clause } = args;
 
 		if (!clause) {
 			throw new TypeError("clause must be provided");
@@ -214,13 +211,8 @@ export class ClaimAttempt {
 	readonly claim: Claim;
 	readonly conflict_with: ReadonlySet<Claim>;
 
-	constructor({
-		claim,
-		conflict_with = new Set(),
-	}: {
-		claim: Claim;
-		conflict_with?: Set<Claim>;
-	}) {
+	constructor(args: { claim: Claim; conflict_with?: Set<Claim> }) {
+		let { claim, conflict_with = new Set<Claim>() } = args;
 		this.claim = claim;
 		this.conflict_with = conflict_with;
 	}
@@ -266,6 +258,7 @@ export class RequirementState {
 }
 
 export class Requirement {
+	readonly type = "requirement";
 	readonly name: string;
 	readonly saves: ReadonlyMap<string, SaveRule>;
 	readonly requirements: ReadonlyMap<string, Requirement>;
@@ -302,6 +295,24 @@ export class Requirement {
 		} else if (data.registrar_audited || false) {
 			this.audited_by = "registrar";
 		}
+	}
+
+	toJSON() {
+		return {
+			type: "requirement",
+			name: this.name,
+			saves: Object.fromEntries(this.saves),
+			requirements: Object.fromEntries(this.requirements),
+			message: this.message,
+			result: this.result,
+			audited_by: this.audited_by,
+			contract: this.contract,
+			state: "rule",
+			status: "pending",
+			ok: false,
+			rank: 0,
+			claims: [],
+		};
 	}
 
 	validate({ ctx }: { ctx: RequirementContext }) {
@@ -396,6 +407,7 @@ export class Requirement {
 }
 
 export class RequirementSolution implements Solution {
+	readonly type = "requirement";
 	readonly name: string;
 	readonly saves: ReadonlyMap<string, SaveRule>;
 	readonly requirements: ReadonlyMap<string, Requirement>;
@@ -407,11 +419,9 @@ export class RequirementSolution implements Solution {
 
 	constructor(
 		req: Requirement,
-		{
-			solution,
-			inputs,
-		}: { solution?: Solution; inputs: Array<[string, number]> },
+		args: { solution?: Solution; inputs: Array<[string, number]> },
 	) {
+		let { solution, inputs } = args;
 		this.inputs = inputs;
 		this.result = solution;
 		this.name = req.name;
@@ -420,6 +430,24 @@ export class RequirementSolution implements Solution {
 		this.message = req.message;
 		this.audited_by = req.audited_by;
 		this.contract = req.contract;
+	}
+
+	toJSON() {
+		return {
+			type: "requirement",
+			name: this.name,
+			saves: Object.fromEntries(this.saves),
+			requirements: Object.fromEntries(this.requirements),
+			message: this.message,
+			result: this.result,
+			audited_by: this.audited_by,
+			contract: this.contract,
+			state: this.state(),
+			status: "pending",
+			ok: this.ok(),
+			rank: this.rank(),
+			claims: this.claims(),
+		};
 	}
 
 	matched() {
@@ -460,25 +488,19 @@ export class RequirementSolution implements Solution {
 		return this.result.rank();
 	}
 
-	audit({
-		ctx,
-		path,
-	}: {
-		ctx: RequirementContext;
-		path: string[];
-	}): RequirementResult {
+	audit(args: { ctx: RequirementContext; path: string[] }): RequirementResult {
 		if (!this.result) {
 			// TODO: return something better
 			return new RequirementResult(this);
 		}
 
+		let { ctx, path } = args;
 		let result = this.result.audit({ ctx, path });
-
 		return new RequirementResult(this, result);
 	}
 }
 
-export class RequirementResult {
+export class RequirementResult implements Result {
 	readonly name: string;
 	readonly saves: ReadonlyMap<string, SaveRule> = new Map();
 	readonly requirements: ReadonlyMap<string, Requirement> = new Map();
@@ -497,6 +519,24 @@ export class RequirementResult {
 		this.audited_by = sol.audited_by;
 		this.contract = sol.contract;
 		this.result = result;
+	}
+
+	toJSON() {
+		return {
+			type: "requirement",
+			name: this.name,
+			saves: Object.fromEntries(this.saves),
+			requirements: Object.fromEntries(this.requirements),
+			message: this.message,
+			result: this.result,
+			audited_by: this.audited_by,
+			contract: this.contract,
+			state: this.state(),
+			status: this.ok() ? "pass" : "problem",
+			ok: this.ok(),
+			rank: this.rank(),
+			claims: this.claims(),
+		};
 	}
 
 	state() {

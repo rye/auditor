@@ -1,6 +1,5 @@
 import { logger } from "../logging";
 import assert from "assert";
-
 import { CountSolution, Solution } from "../solution";
 import { RequirementContext } from "../requirement";
 import { CourseRule } from "./course";
@@ -12,12 +11,26 @@ import cartesian from "../vendor/cartesian";
 import combinations from "../vendor/combinations";
 
 export class CountRule implements Rule {
+	readonly type = "count";
 	readonly count: number;
 	readonly items: ReadonlyArray<Rule>;
 
 	constructor({ count, items }: { count: number; items: ReadonlyArray<Rule> }) {
 		this.count = count;
 		this.items = items;
+	}
+
+	toJSON() {
+		return {
+			type: "count",
+			state: this.state(),
+			count: this.count,
+			items: this.items,
+			status: this.ok() ? "pass" : "problem",
+			rank: this.rank(),
+			ok: this.ok(),
+			claims: this.claims(),
+		};
 	}
 
 	state(): "rule" {
@@ -106,13 +119,11 @@ export class CountRule implements Rule {
 		}
 	}
 
-	*solutions({
-		ctx,
-		path,
-	}: {
+	*solutions(args: {
 		ctx: RequirementContext;
 		path: string[];
 	}): IterableIterator<Solution> {
+		let { ctx, path } = args;
 		path = [...path, ".of"];
 		logger.debug(path);
 

@@ -7,6 +7,7 @@ import { CourseInstance } from "./data";
 type RawLimit = { at_most: number; where: object };
 
 export class Limit {
+	readonly type = "limit";
 	readonly at_most: number;
 	readonly where: Clause;
 
@@ -21,6 +22,10 @@ export class LimitSet {
 
 	constructor(data?: RawLimit[]) {
 		this.limits = (data || []).map(l => new Limit(l));
+	}
+
+	toJSON() {
+		return this.limits;
 	}
 
 	apply_limits(courses: ReadonlyArray<CourseInstance>) {

@@ -18,6 +18,21 @@ export class FromRule implements Rule {
 	readonly limit: LimitSet;
 	readonly where: null | Clause = null;
 
+	toJSON() {
+		return {
+			type: "from",
+			source: this.source,
+			limit: this.limit,
+			action: this.action,
+			where: this.where,
+			status: "skip",
+			state: this.state(),
+			ok: this.ok(),
+			rank: this.rank(),
+			claims: this.claims(),
+		};
+	}
+
 	state(): "rule" {
 		return "rule";
 	}

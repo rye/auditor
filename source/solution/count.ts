@@ -5,8 +5,22 @@ import { Solution } from "./interface";
 import { enumerate } from "../lib";
 
 export class CountSolution implements Solution {
+	readonly type = "count";
 	readonly count: number;
 	readonly items: ReadonlyArray<Solution | Rule>;
+
+	toJSON() {
+		return {
+			type: "count",
+			state: this.state(),
+			count: this.count,
+			items: this.items,
+			status: "pending",
+			rank: this.rank(),
+			ok: this.ok(),
+			claims: this.claims(),
+		};
+	}
 
 	state(): "solution" {
 		return "solution";

@@ -7,4 +7,13 @@ export interface Solution {
 	rank(): 0;
 	ok(): boolean;
 	audit(_: { ctx: RequirementContext; path: (string | number)[] }): Result;
+
+	toJSON(): {
+		type: string;
+		state: string;
+		status: string;
+		ok: boolean;
+		rank: number;
+		claims: readonly ClaimAttempt[];
+	};
 }

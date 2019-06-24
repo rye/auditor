@@ -3,6 +3,7 @@ import { FromRule } from "../rule";
 import { Result } from "./interface";
 
 export class FromResult implements Result {
+	readonly type = "from";
 	readonly rule: FromRule;
 	readonly successful_claims: ReadonlyArray<ClaimAttempt>;
 	readonly failed_claims: ReadonlyArray<ClaimAttempt>;
@@ -19,6 +20,22 @@ export class FromResult implements Result {
 		this.successful_claims = successful_claims;
 		this.failed_claims = failed_claims;
 		this.success = success;
+	}
+
+	toJSON() {
+		return {
+			type: "from",
+			source: this.rule.source,
+			action: this.rule.action,
+			where: this.rule.where,
+			successful_claims: this.successful_claims,
+			failed_claims: this.failed_claims,
+			state: this.state(),
+			status: "pending",
+			ok: this.ok(),
+			rank: this.rank(),
+			claims: this.claims(),
+		};
 	}
 
 	claims() {

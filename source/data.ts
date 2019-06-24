@@ -7,6 +7,7 @@ import { Clause, SingleClause, AndClause, OrClause } from "./clause";
 const logging = loggers.get("degreepath");
 
 export class Term {
+	readonly type = "term";
 	readonly term: number;
 
 	constructor(term: number) {
@@ -19,6 +20,10 @@ export class Term {
 
 	get semester() {
 		return parseInt(this.term.toString().substr(4, 1), 10);
+	}
+
+	toJSON() {
+		return { type: this.type, year: this.year, semester: this.semester };
 	}
 }
 

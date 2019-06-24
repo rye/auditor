@@ -11,6 +11,7 @@ import { Result } from "./result";
 class InvalidMulticountable extends TypeError {}
 
 export class AreaOfStudy {
+	readonly type = "area";
 	readonly name: string;
 	readonly kind: string;
 	readonly degree: string;
@@ -126,6 +127,7 @@ export class AreaOfStudy {
 }
 
 export class AreaSolution {
+	readonly type = "area";
 	readonly solution: Solution;
 	readonly area: AreaOfStudy;
 

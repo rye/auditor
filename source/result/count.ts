@@ -3,6 +3,7 @@ import { Rule } from "../rule";
 import { sum } from "../lib";
 
 export class CountResult implements Result {
+	readonly type = "count";
 	readonly count: number;
 	readonly items: ReadonlyArray<Rule | Result>;
 
@@ -12,6 +13,19 @@ export class CountResult implements Result {
 	}) {
 		this.count = args.count;
 		this.items = args.items;
+	}
+
+	toJSON() {
+		return {
+			type: "count",
+			state: this.state(),
+			count: this.count,
+			items: this.items,
+			status: this.ok() ? "pass" : "problem",
+			rank: this.rank(),
+			ok: this.ok(),
+			claims: this.claims(),
+		};
 	}
 
 	state(): "result" {
