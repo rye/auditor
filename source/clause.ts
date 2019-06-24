@@ -171,7 +171,7 @@ export class SingleClause implements Clause {
 				to_value = to_value[0];
 			} else {
 				logger.debug("clause/compare: beginning recursive comparison");
-				return to_value.some(this.compare);
+				return to_value.some(v => this.compare(v));
 			}
 		}
 
