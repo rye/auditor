@@ -31,7 +31,7 @@ export class FromResult implements Result {
 			claims: this.claims(),
 			failures: this.failed_claims,
 			state: this.state(),
-			status: "pending",
+			status: this.ok() ? "pass" : "skip",
 			ok: this.ok(),
 			rank: this.rank(),
 		};
