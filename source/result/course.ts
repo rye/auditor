@@ -20,7 +20,11 @@ export class CourseResult implements Result {
 
 	toJSON() {
 		return {
-			...this.rule.toJSON(),
+			type: "course",
+			course: this.rule.course,
+			hidden: this.rule.hidden,
+			grade: this.rule.grade,
+			allow_claimed: this.rule.allow_claimed,
 			state: this.state(),
 			status: this.ok() ? "pass" : "skip",
 			ok: this.ok(),

@@ -28,13 +28,12 @@ export class FromResult implements Result {
 			source: this.rule.source,
 			action: this.rule.action,
 			where: this.rule.where,
-			successful_claims: this.successful_claims,
-			failed_claims: this.failed_claims,
+			claims: this.claims(),
+			failures: this.failed_claims,
 			state: this.state(),
 			status: "pending",
 			ok: this.ok(),
 			rank: this.rank(),
-			claims: this.claims(),
 		};
 	}
 

@@ -16,8 +16,11 @@ export class CourseSolution implements Solution {
 
 	toJSON() {
 		return {
-			...this.rule.toJSON(),
-			type: "count",
+			type: "course",
+			course: this.rule.course,
+			hidden: this.rule.hidden,
+			grade: this.rule.grade,
+			allow_claimed: this.rule.allow_claimed,
 			state: this.state(),
 			status: "pending",
 			rank: this.rank(),

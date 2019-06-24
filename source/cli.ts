@@ -366,14 +366,13 @@ function* summarize(args: {
 	yield endl;
 	yield endl;
 
-	// yield [...print_result(result)].join(endl);
+	yield [...print_result(result)].join(endl);
 
-	yield JSON.stringify(result, null, 2);
+	// yield JSON.stringify(result, null, 2);
 
 	yield endl;
 }
 
-/*
 function* print_result(
 	rule: Rule | Solution | Result,
 	indent = 0,
@@ -385,14 +384,12 @@ function* print_result(
 		return;
 	}
 
-	if (
-		rule instanceof CourseRule ||
-		rule instanceof CourseSolution ||
-		rule instanceof CourseResult
-	) {
+	let r: any = rule.toJSON();
+
+	if (r.type === "course") {
 		let status = "🌀      ";
-		if (rule.ok()) {
-			let claim = rule.claims()[0].claim;
+		if (r.ok) {
+			let claim = r.claims[0].claim;
 			let course = claim.course;
 
 			if (course.status == CourseStatus.Ok) {
@@ -408,81 +405,73 @@ function* print_result(
 			}
 		}
 
-		yield `${prefix}${status} ${rule["course"]}`;
+		yield `${prefix}${status} ${r.course}`;
 		return;
 	}
 
-	if (
-		rule instanceof CountRule ||
-		rule instanceof CountSolution ||
-		rule instanceof CountResult
-	) {
+	if (r.type === "count") {
 		let emoji;
-		if (rule.status() == "pass") {
+		if (r.status == "pass") {
 			emoji = "💚";
-		} else if (rule.status() == "skip") {
+		} else if (r.status == "skip") {
 			emoji = "🌀";
 		} else {
 			emoji = "🚫️";
 		}
 
-		let size = rule.items.length;
+		let size = r.items.length;
 		let descr;
-		if (rule["count"] == 1 && size == 2) {
+		if (r.count == 1 && size == 2) {
 			descr = `either of (these ${size})`;
-		} else if (rule["count"] == 2 && size == 2) {
+		} else if (r.count == 2 && size == 2) {
 			descr = `both of (these ${size})`;
-		} else if (rule["count"] == size) {
+		} else if (r.count == size) {
 			descr = `all of (these ${size})`;
-		} else if (rule["count"] == 1) {
+		} else if (r.count == 1) {
 			descr = `any of (these ${size})`;
 		} else {
-			descr = `{rule['count']} of {size}`;
+			descr = `${r.count} of ${size}`;
 		}
-		let ok_count = rule.items.filter((r: Rule | Result | Solution) => r.ok())
+		let ok_count = r.items.filter((r: Rule | Result | Solution) => r.ok())
 			.length;
-		descr += ` (ok: ${ok_count}; need: ${rule["count"]})`;
+		descr += ` (ok: ${ok_count}; need: ${r.count})`;
 
 		yield `${prefix}${emoji} ${descr}`;
 
-		for (let r of rule["items"]) {
-			yield* print_result(r, (indent = indent + 4));
+		for (let item of r.items) {
+			yield* print_result(item, indent + 4);
 		}
 		return;
 	}
 
-	if (
-		rule instanceof FromRule ||
-		rule instanceof FromSolution ||
-		rule instanceof FromResult
-	) {
+	if (r.type === "from") {
 		let emoji;
-		if (rule.status() == "pass") {
+		if (r.status == "pass") {
 			emoji = "💚";
-		} else if (rule.status() == "skip") {
+		} else if (r.status == "skip") {
 			emoji = "🌀";
 		} else {
 			emoji = "🚫️";
 		}
 
-		yield `${prefix}${emoji} Given courses matching ${rule.where.toString()}`;
+		yield `${prefix}${emoji} Given courses matching ${r.where.toString()}`;
 
-		if (rule.claims.length) {
+		if (r.claims.length) {
 			yield `${prefix} Matching courses:`;
-			for (let c of rule.claims) {
+			for (let c of r.claims) {
 				yield `${prefix}   ${c["claim"]["course"]["shorthand"]} \"${c["claim"]["course"]["name"]}\" (${c["claim"]["course"]["clbid"]})`;
 			}
 		}
 
-		if (rule.failures) {
+		if (r.failures.length) {
 			yield `${prefix} Pre-claimed courses which cannot be re-claimed:`;
-			for (let c of rule.failures) {
+			for (let c of r.failures) {
 				yield `${prefix}   ${c["claim"]["course"]["shorthand"]} \"${c["claim"]["course"]["name"]}\" (${c["claim"]["course"]["clbid"]})`;
 			}
 		}
 
 		let action_desc = "";
-		let action = rule.action;
+		let action = r.action;
 		if (action.operator == Operator.GreaterThanOrEqualTo) {
 			action_desc = `at least ${action.compare_to}`;
 		} else if (action.operator == Operator.GreaterThan) {
@@ -502,55 +491,50 @@ function* print_result(
 			word = "items";
 		}
 
-		yield `${prefix} There must be ${action_desc} matching ${word} (have: ${rule.claims.length}; need: ${action.compare_to})`;
+		yield `${prefix} There must be ${action_desc} matching ${word} (have: ${r.claims.length}; need: ${action.compare_to})`;
 		return;
 	}
 
-	if (
-		rule instanceof Requirement ||
-		rule instanceof RequirementSolution ||
-		rule instanceof RequirementResult
-	) {
+	if (r.type === "requirement") {
 		let emoji;
-		if (rule.status() == "pass") {
+		if (r.status == "pass") {
 			emoji = "💚";
-		} else if (rule.status() == "skip") {
+		} else if (r.status == "skip") {
 			emoji = "🌀";
 		} else {
 			emoji = "🚫️";
 		}
 
-		yield `${prefix}${emoji} Requirement(${rule["name"]})`;
-		if (rule["audited_by"] != null) {
-			yield `${prefix}    Audited by: ${rule["audited_by"]}; assuming success`;
+		yield `${prefix}${emoji} Requirement(${r["name"]})`;
+		if (r["audited_by"] != null) {
+			yield `${prefix}    Audited by: ${r["audited_by"]}; assuming success`;
 			return;
 		}
 
-		if (rule.result) {
-			yield* print_result(rule.result, indent + 4);
+		if (r.result) {
+			yield* print_result(r.result, indent + 4);
 		} else {
 			yield "(no rule is present for this requirement)";
 		}
 		return;
 	}
 
-	if (rule instanceof ReferenceRule) {
+	if (r.type === "reference") {
 		let emoji;
-		if (rule.status() == "pass") {
+		if (r.status == "pass") {
 			emoji = "💚";
-		} else if (rule.status() == "skip") {
+		} else if (r.status == "skip") {
 			emoji = "🌀";
 		} else {
 			emoji = "🚫️";
 		}
 
-		yield `${prefix}${emoji} Requirement(${rule["name"]})`;
+		yield `${prefix}${emoji} Requirement(${r.name})`;
 		yield `${prefix}   [Skipped]`;
 		return;
 	}
 
-	yield JSON.stringify(rule, null, 2);
+	yield JSON.stringify(r, null, 2);
 }
-*/
 
 main();
