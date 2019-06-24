@@ -29,8 +29,10 @@ export class AreaOfStudy {
 		this.name = data.name;
 		assert(data.type != null);
 		this.kind = data.type;
-		assert(data.degree != null);
-		this.degree = data.degree;
+		if (this.kind !== "degree") {
+			assert(data.degree != null);
+			this.degree = data.degree;
+		}
 		assert(data.catalog != null);
 		this.catalog = data.catalog;
 
