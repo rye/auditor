@@ -51,7 +51,7 @@ export class RequirementContext {
 
 	*completed_courses() {
 		for (let course of this.transcript) {
-			if (course.status != CourseStatus.DidNotComplete) {
+			if (course.status !== CourseStatus.DidNotComplete) {
 				yield course;
 			}
 		}
