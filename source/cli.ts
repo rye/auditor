@@ -1,34 +1,19 @@
-import { logger } from "./logging";
-
 import { readFileSync, existsSync, unlinkSync, writeFileSync } from "fs";
-
-import { Decimal } from "decimal.js";
-import makeDir from "make-dir";
-import * as path from "path";
-import { parse as parseYaml } from "yaml";
-
-import prettyMs from "pretty-ms";
-import { AreaOfStudy, AreaSolution } from "./area";
-import { CourseInstance, CourseStatus } from "./data";
-import { Operator } from "./clause";
-
-import { take, sum, intersection, DefaultMap, enumerate } from "./lib";
-
-import yargs from "yargs";
 import { performance } from "perf_hooks";
-import { Rule, CourseRule, CountRule, FromRule, ReferenceRule } from "./rule";
-import {
-	Solution,
-	CourseSolution,
-	CountSolution,
-	FromSolution,
-} from "./solution";
-import { Result, CourseResult, CountResult, FromResult } from "./result";
-import {
-	Requirement,
-	RequirementSolution,
-	RequirementResult,
-} from "./requirement";
+import * as path from "path";
+
+import makeDir from "make-dir";
+import yargs from "yargs";
+import { parse as parseYaml } from "yaml";
+import prettyMs from "pretty-ms";
+
+import { AreaOfStudy } from "./area";
+import { CourseInstance, CourseStatus, loadCourse } from "./data";
+import { Operator } from "./clause";
+import { sum, intersection, DefaultMap, enumerate } from "./lib";
+import { Rule } from "./rule";
+import { Solution } from "./solution";
+import { Result } from "./result";
 
 type Student = {
 	name: string;
@@ -101,6 +86,7 @@ function main() {
 	let allowed: DefaultMap<string, Set<string>> = DefaultMap.empty(
 		() => new Set(),
 	);
+
 	for (let f of args.area) {
 		let text = readFileSync(f, { encoding: "utf-8" });
 		let a = parseYaml(text);
@@ -144,7 +130,7 @@ function run(
 	for (let [i, student] of enumerate(students)) {
 		let transcript: CourseInstance[] = [];
 		for (let row of student["courses"]) {
-			let instance = new CourseInstance(row);
+			let instance = loadCourse(row);
 			if (instance) {
 				transcript.push(instance);
 			}
