@@ -1,0 +1,1277 @@
+---
+area:
+  name: Asian Studies
+  type: major
+  degree: Bachelor of Arts
+  catalog: 2018-19
+
+  result:
+    count: all
+    of:
+      - requirement: Language
+      - requirement: Seminar
+      - requirement: Electives
+
+
+  attributes:
+    courses:
+      AR/AS 259: [asian_elective]
+      AR/AS 260: [asian_elective]
+      AR/AS 262: [asian_elective]
+      AR/AS 270: [asian_elective]
+      AR/AS 310: [asian_elective]
+      AS/ES 277: [asian_elective]
+      AS/HI 250: [asian_elective]
+      AS/HI 251: [asian_elective]
+      AS/HI 252: [asian_elective]
+      AS/HI 253: [asian_elective]
+      AS/HI 262: [asian_elective]
+      AS/HI 345: [asian_elective]
+      AS/PH 251: [asian_elective]
+      AS/PS 245: [asian_elective]
+      AS/PS 250: [asian_elective]
+      AS/RE 253: [asian_elective]
+      AS/RE 254: [asian_elective]
+      AS/RE 256: [asian_elective]
+      AS/RE 257: [asian_elective]
+      AS/RE 289: [asian_elective]
+      AS/SA 239: [asian_elective]
+      ASIAN 121: [asian_elective]
+      ASIAN 123: [asian_elective]
+      ASIAN 126: [asian_elective]
+      ASIAN 130: [asian_elective]
+      ASIAN 156: [asian_elective]
+      ASIAN 200: [asian_elective]
+      ASIAN 210: [asian_elective]
+      ASIAN 215: [asian_elective]
+      ASIAN 216: [asian_elective]
+      ASIAN 220: [asian_elective]
+      ASCON 210: [asian_elective]
+      ASCON 215: [asian_elective]
+      ASCON 216: [asian_elective]
+      ASCON 220: [asian_elective]
+      ASIAN 223: [asian_elective]
+      ASIAN 230: [asian_elective]
+      ASIAN 235: [asian_elective]
+      ASIAN 236: [asian_elective]
+      ASIAN 237: [asian_elective]
+      ASIAN 240: [asian_elective, asian_region_japan]
+      ASIAN 268: [asian_elective]
+      ASIAN 294: [asian_elective]
+      ASIAN 298: [asian_elective]
+      ASIAN 300: [asian_elective]
+      ASIAN 384: [asian_elective]
+      ASIAN 396: [asian_elective]
+      ASIAN 397: [asian_elective]
+      ASIAN 398: [asian_elective]
+      ASIAN 399: [asian_elective]
+      CHIN 231: [asian_language_chinese]
+      CHIN 232: [asian_language_chinese]
+      CHIN 301: [asian_elective, asian_region_china, asian_language_chinese]
+      CHIN 302: [asian_elective, asian_region_china, asian_language_chinese]
+      CHIN 320: [asian_elective, asian_region_china, asian_language_chinese]
+      CHIN 351: [asian_elective, asian_region_china, asian_language_chinese]
+      CHIN 394: [asian_elective]
+      CHIN 398: [asian_elective]
+      ECON 218: [asian_elective]
+      ECON 238: [asian_elective]
+      HIST 240: [asian_elective]
+      JAPAN 231: [asian_language_japanese]
+      JAPAN 232: [asian_language_japanese]
+      JAPAN 301: [asian_elective, asian_region_japan, asian_language_japanese]
+      JAPAN 302: [asian_elective, asian_region_japan, asian_language_japanese]
+      JAPAN 320: [asian_elective, asian_region_japan, asian_language_japanese]
+      JAPAN 394: [asian_elective]
+      JAPAN 398: [asian_elective]
+      PHIL 127: [asian_elective]
+
+  requirements:
+    Language:
+      result:
+        from: {student: courses}
+        where:
+          $or:
+            - {attributes: {$eq: asian_language_chinese}}
+            - {attributes: {$eq: asian_language_japanese}}
+        assert: {count(courses): {$gte: 1}}
+
+    Seminar:
+      result:
+        either:
+          - course: ASIAN 397
+          - course: ASIAN 399
+
+    Electives:
+      result:
+        from: {student: courses}
+        where: {attributes: {$eq: asian_elective}}
+        limit:
+          # and "No level I or level II language courses may count." is taken
+          # care of by not listing them as electives
+
+          # "No more than two at level I"
+          - at_most: 2
+            where: {level: {$eq: 100}}
+          # "No more than four elective courses about any one country"
+          - at_most: 4
+            where: {attributes: {$eq: asian_region_china}}
+          - at_most: 4
+            where: {attributes: {$eq: asian_region_japan}}
+          # "At least two at level II or level III, taken on campus"
+          # aka "no more than 4 may be taken off-campus", since we need six
+          - at_most: 4
+            where:
+              $and:
+                - institution: {$neq: 'St. Olaf College'}
+                - $or:
+                    - level: {$eq: 200}
+                    - level: {$eq: 300}
+        assert: {count(courses): {$gte: 6}}
+
+student: {
+  "curriculum": 2008,
+  "catalog": 2012,
+  "matriculation": 2012,
+  "areas": [
+    {
+      "code": 150,
+      "status": "certified",
+      "kind": "major",
+      "degree": "B.A.",
+      "name": "Asian Studies"
+    },
+    {
+      "code": 200,
+      "status": "certified",
+      "kind": "major",
+      "degree": "B.A.",
+      "name": "Computer Science"
+    }
+  ],
+  "courses": [
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "REG"
+      ],
+      "number": "0001",
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000081526",
+      "graded": "No Grade",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20119,
+      "course": "REG 0001",
+      "name": "St. Olaf Equiv Credits",
+      "semester": 9,
+      "year": 2011,
+      "grade": "NG",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "JAPAN"
+      ],
+      "number": 111,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000082768",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20121,
+      "course": "JAPAN 111",
+      "name": "Beginning Japanese I",
+      "semester": 1,
+      "year": 2012,
+      "grade": "C-",
+      "section": "A"
+    },
+    {
+      "subtype": "L",
+      "credits": "0.00",
+      "subjects": [
+        "JAPAN"
+      ],
+      "number": 111,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000082771",
+      "graded": "No Grade",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20121,
+      "course": "JAPAN 111",
+      "name": "Beginning Japanese I Lab",
+      "semester": 1,
+      "year": 2012,
+      "grade": "NG",
+      "section": "B"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "REL"
+      ],
+      "number": 121,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000082792",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "BTS-B"
+      ],
+      "term": 20121,
+      "course": "REL 121",
+      "name": "Bible/Culture/Commun",
+      "semester": 1,
+      "year": 2012,
+      "grade": "C",
+      "section": "C"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "AMCON"
+      ],
+      "number": 101,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000082908",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20121,
+      "course": "AMCON 101",
+      "name": "Declaring Ind: 1607-1865",
+      "semester": 1,
+      "year": 2012,
+      "grade": "B-",
+      "section": "A"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 121,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000083505",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "AQR"
+      ],
+      "term": 20121,
+      "course": "CSCI 121",
+      "name": "Principles Comp Sci",
+      "semester": 1,
+      "year": 2012,
+      "grade": "A-",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "JAPAN"
+      ],
+      "number": 112,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000084378",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20123,
+      "course": "JAPAN 112",
+      "name": "Beginning Japanese II",
+      "semester": 3,
+      "year": 2012,
+      "grade": "C-",
+      "section": "A"
+    },
+    {
+      "subtype": "L",
+      "credits": "0.00",
+      "subjects": [
+        "JAPAN"
+      ],
+      "number": 112,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000084381",
+      "graded": "No Grade",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20123,
+      "course": "JAPAN 112",
+      "name": "Beginning Japanese II Lab",
+      "semester": 3,
+      "year": 2012,
+      "grade": "NG",
+      "section": "B"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 268,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000084461",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "ALS-A",
+        "MCG"
+      ],
+      "term": 20123,
+      "course": "ASIAN 268",
+      "name": "Chinese Calligraphy",
+      "semester": 3,
+      "year": 2012,
+      "grade": "B",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "AMCON"
+      ],
+      "number": 102,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000084513",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "FYW",
+        "HWC"
+      ],
+      "term": 20123,
+      "course": "AMCON 102",
+      "name": "Dem Vistas: 1800-1900",
+      "semester": 3,
+      "year": 2012,
+      "grade": "B-",
+      "section": "B"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 130,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000085898",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "MCG",
+        "ALS-L"
+      ],
+      "term": 20122,
+      "course": "ASIAN 130",
+      "name": "Japan SciFi/Global Persp",
+      "semester": 2,
+      "year": 2012,
+      "grade": "B+",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 251,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000085991",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20123,
+      "course": "CSCI 251",
+      "name": "Software Design",
+      "semester": 3,
+      "year": 2012,
+      "grade": "B",
+      "section": ""
+    },
+    {
+      "subtype": "L",
+      "credits": "0.25",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 252,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000085992",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20123,
+      "course": "CSCI 252",
+      "name": "Software Design/Lab",
+      "semester": 3,
+      "year": 2012,
+      "grade": "B",
+      "section": "A"
+    },
+    {
+      "subtype": "R",
+      "credits": "0.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 1043,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000087891",
+      "graded": "No Grade",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20119,
+      "course": "CSCI 1043",
+      "name": "Intro Pgrm Prob Slvg",
+      "semester": 9,
+      "year": 2011,
+      "grade": "B",
+      "section": "P"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 210,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000088273",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20131,
+      "course": "ASIAN 210",
+      "name": "AsianCon1:MappingJourneys",
+      "semester": 1,
+      "year": 2013,
+      "grade": "B+",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 241,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000088593",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20131,
+      "course": "CSCI 241",
+      "name": "Hardware Design",
+      "semester": 1,
+      "year": 2013,
+      "grade": "B",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "0.25",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 275,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000088630",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20131,
+      "course": "ASIAN 275",
+      "name": "ID Approaches to Asia",
+      "semester": 1,
+      "year": 2013,
+      "grade": "A",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "JAPAN"
+      ],
+      "number": 231,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000088681",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "FOL-J"
+      ],
+      "term": 20131,
+      "course": "JAPAN 231",
+      "name": "Intermed Japanese I",
+      "semester": 1,
+      "year": 2013,
+      "grade": "D+",
+      "section": ""
+    },
+    {
+      "subtype": "L",
+      "credits": "0.00",
+      "subjects": [
+        "JAPAN"
+      ],
+      "number": 231,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000088682",
+      "graded": "No Grade",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20131,
+      "course": "JAPAN 231",
+      "name": "Intermed Japanese I Lab",
+      "semester": 1,
+      "year": 2013,
+      "grade": "NG",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "AMCON"
+      ],
+      "number": 201,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000089090",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "ALS-L",
+        "MCD",
+        "WRI"
+      ],
+      "term": 20131,
+      "course": "AMCON 201",
+      "name": "Remaking Am: 1865-1945",
+      "semester": 1,
+      "year": 2013,
+      "grade": "B-",
+      "section": "A"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 215,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000089466",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20132,
+      "course": "ASIAN 215",
+      "name": "AsianCon2: Encounter Asia",
+      "semester": 2,
+      "year": 2013,
+      "grade": "B+",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 220,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000089957",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "HBS",
+        "ALS-A",
+        "ALS-L",
+        "ORC",
+        "MCG",
+        "WRI"
+      ],
+      "term": 20133,
+      "course": "ASIAN 220",
+      "name": "AsiaCon3:InterpretJourney",
+      "semester": 3,
+      "year": 2013,
+      "grade": "B+",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "MATH"
+      ],
+      "number": 220,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000090172",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "AQR"
+      ],
+      "term": 20133,
+      "course": "MATH 220",
+      "name": "Elem Linear Algebra",
+      "semester": 3,
+      "year": 2013,
+      "grade": "B",
+      "section": "B"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "JAPAN"
+      ],
+      "number": 232,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000090339",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "FOL-J"
+      ],
+      "term": 20133,
+      "course": "JAPAN 232",
+      "name": "Intermed Japanese II",
+      "semester": 3,
+      "year": 2013,
+      "grade": "C",
+      "section": ""
+    },
+    {
+      "subtype": "L",
+      "credits": "0.00",
+      "subjects": [
+        "JAPAN"
+      ],
+      "number": 232,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000090340",
+      "graded": "No Grade",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20133,
+      "course": "JAPAN 232",
+      "name": "Intermed Japanese II Lab",
+      "semester": 3,
+      "year": 2013,
+      "grade": "NG",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "AMCON"
+      ],
+      "number": 202,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000090719",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "WRI",
+        "ORC",
+        "ALS-A",
+        "HBS"
+      ],
+      "term": 20133,
+      "course": "AMCON 202",
+      "name": "Pur/Happiness: 1920-Pres.",
+      "semester": 3,
+      "year": 2013,
+      "grade": "B+",
+      "section": "A"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 253,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000095594",
+      "graded": "S/U",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20143,
+      "course": "CSCI 253",
+      "name": "Algorithms/Data Struc",
+      "semester": 3,
+      "year": 2014,
+      "grade": "C-",
+      "section": "A"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 263,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000095842",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "ORC",
+        "EIN"
+      ],
+      "term": 20143,
+      "course": "CSCI 263",
+      "name": "Ethical Iss: Software",
+      "semester": 3,
+      "year": 2014,
+      "grade": "A-",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 315,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000097119",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "IST"
+      ],
+      "term": 20141,
+      "course": "CSCI 315",
+      "name": "Bioinformatics",
+      "semester": 1,
+      "year": 2014,
+      "grade": "A",
+      "section": ""
+    },
+    {
+      "subtype": "T",
+      "credits": "1.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 300,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000097120",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20141,
+      "course": "CSCI 300",
+      "name": "Top: Mobile Web Graphics",
+      "semester": 1,
+      "year": 2014,
+      "grade": "A-",
+      "section": ""
+    },
+    {
+      "subtype": "T",
+      "credits": "1.00",
+      "subjects": [
+        "MATH"
+      ],
+      "number": 282,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000097125",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20141,
+      "course": "MATH 282",
+      "name": "Top: Intro Abstract Math",
+      "semester": 1,
+      "year": 2014,
+      "grade": "D+",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 230,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000097217",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "ALS-L",
+        "MCG"
+      ],
+      "term": 20141,
+      "course": "ASIAN 230",
+      "name": "The Philosophy of Anime",
+      "semester": 1,
+      "year": 2014,
+      "grade": "B+",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "REL"
+      ],
+      "number": 209,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000097333",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "BTS-T"
+      ],
+      "term": 20143,
+      "course": "REL 209",
+      "name": "Intro Feminist Theol",
+      "semester": 3,
+      "year": 2014,
+      "grade": "B+",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 268,
+      "is_repeat": true,
+      "transcript_code": "",
+      "clbid": "0000097407",
+      "graded": "Audit",
+      "incomplete": false,
+      "gereqs": [
+        "ALS-A",
+        "MCG"
+      ],
+      "term": 20143,
+      "course": "ASIAN 268",
+      "name": "Asian Calligraphy",
+      "semester": 3,
+      "year": 2014,
+      "grade": "AU",
+      "section": ""
+    },
+    {
+      "subtype": "F",
+      "credits": "0.25",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 230,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000097413",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20141,
+      "course": "ASIAN 230",
+      "name": "FLC - Japanese",
+      "semester": 1,
+      "year": 2014,
+      "grade": "B",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "ART"
+      ],
+      "number": 161,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000097582",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "ALS-A",
+        "MCG"
+      ],
+      "term": 20143,
+      "course": "ART 161",
+      "name": "World Architecture",
+      "semester": 3,
+      "year": 2014,
+      "grade": "A",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "CHEM"
+      ],
+      "number": 398,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000099351",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20142,
+      "course": "CHEM 398",
+      "name": "IR/Software Development",
+      "semester": 2,
+      "year": 2014,
+      "grade": "A",
+      "section": "B"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "JAPAN"
+      ],
+      "number": 301,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000099504",
+      "graded": "Audit",
+      "incomplete": false,
+      "gereqs": [
+        "FOL-J"
+      ],
+      "term": 20151,
+      "course": "JAPAN 301",
+      "name": "Advanced Japanese I",
+      "semester": 1,
+      "year": 2015,
+      "grade": "AU",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "0.25",
+      "subjects": [
+        "DANCE"
+      ],
+      "number": 115,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000100346",
+      "graded": "P/N",
+      "incomplete": false,
+      "gereqs": [
+        "SPM"
+      ],
+      "term": 20151,
+      "course": "DANCE 115",
+      "name": "Power Play",
+      "semester": 1,
+      "year": 2015,
+      "grade": "P",
+      "section": ""
+    },
+    {
+      "subtype": "S",
+      "credits": "1.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 390,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000100423",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "WRI"
+      ],
+      "term": 20151,
+      "course": "CSCI 390",
+      "name": "Sem: Senior Capstone",
+      "semester": 1,
+      "year": 2015,
+      "grade": "B-",
+      "section": "A"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "PHYS"
+      ],
+      "number": 252,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000101017",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "IST",
+        "SED"
+      ],
+      "term": 20152,
+      "course": "PHYS 252",
+      "name": "Musical Acoustics",
+      "semester": 2,
+      "year": 2015,
+      "grade": "B",
+      "section": ""
+    },
+    {
+      "subtype": "L",
+      "credits": "0.00",
+      "subjects": [
+        "PHYS"
+      ],
+      "number": 252,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000101018",
+      "graded": "No Grade",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20152,
+      "course": "PHYS 252",
+      "name": "Musical Acoustics Lab",
+      "semester": 2,
+      "year": 2015,
+      "grade": "NG",
+      "section": ""
+    },
+    {
+      "subtype": "S",
+      "credits": "1.00",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 399,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000102075",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "WRI"
+      ],
+      "term": 20153,
+      "course": "ASIAN 399",
+      "name": "Sem: Asia",
+      "semester": 3,
+      "year": 2015,
+      "grade": "B-",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 273,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000102748",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20151,
+      "course": "CSCI 273",
+      "name": "Operating Systems",
+      "semester": 1,
+      "year": 2015,
+      "grade": "A",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "0.25",
+      "subjects": [
+        "DANCE"
+      ],
+      "number": 215,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000103157",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "SPM"
+      ],
+      "term": 20153,
+      "course": "DANCE 215",
+      "name": "Contact Improvisation",
+      "semester": 3,
+      "year": 2015,
+      "grade": "A-",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "CSCI"
+      ],
+      "number": 276,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000103170",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20153,
+      "course": "CSCI 276",
+      "name": "Programming Languages",
+      "semester": 3,
+      "year": 2015,
+      "grade": "A-",
+      "section": "A"
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "HIST"
+      ],
+      "number": 237,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000103276",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "HWC"
+      ],
+      "term": 20151,
+      "course": "HIST 237",
+      "name": "Women/Medieval Europe",
+      "semester": 1,
+      "year": 2015,
+      "grade": "A",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "AS/PS"
+      ],
+      "number": 245,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000103314",
+      "graded": "Audit",
+      "incomplete": false,
+      "gereqs": [
+        "HBS",
+        "MCG"
+      ],
+      "term": 20153,
+      "course": "AS/PS 245",
+      "name": "Asian Regionalism",
+      "semester": 3,
+      "year": 2015,
+      "grade": "AU",
+      "section": ""
+    },
+    {
+      "subtype": "R",
+      "credits": "1.00",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 240,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000103404",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [
+        "ORC",
+        "HBS",
+        "MCG"
+      ],
+      "term": 20153,
+      "course": "ASIAN 240",
+      "name": "Talking in Japan/US",
+      "semester": 3,
+      "year": 2015,
+      "grade": "C+",
+      "section": ""
+    },
+    {
+      "subtype": "F",
+      "credits": "0.25",
+      "subjects": [
+        "ASIAN"
+      ],
+      "number": 240,
+      "is_repeat": false,
+      "transcript_code": "",
+      "clbid": "0000104968",
+      "graded": "Graded",
+      "incomplete": false,
+      "gereqs": [],
+      "term": 20153,
+      "course": "ASIAN 240",
+      "name": "FLC - Japanese",
+      "semester": 3,
+      "year": 2015,
+      "grade": "C+",
+      "section": ""
+    }
+  ],
+  "stnum": "122932"
+}

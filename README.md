@@ -1,22 +1,18 @@
 # Degreepath, the automated degree auditor
 
-> Gobbldygook lives!
+- Requires [`nuitka`](https://www.nuitka.net/pages/download.html), a Python-to-C compiler
+- Requires [`afl-clang`](http://lcamtuf.coredump.cx/afl/), part of the `afl` (american fuzzy lop) fuzzer
 
-Degreepath is a tool to perform automated, comprehensive, and fast degree audits.
-
-**Automated**: (eventually) A web interface, for reviewing the status of a cohort of students and for running reports
-
-**Comprehensive**: Just checking degree audits? Nah. How about running graduation, general education, major, and concentration/minor audits, all at once?
-
-**Fast**: (eventually) And of course, this only makes sense to run if it's faster than doing the checks by hand. Luckily, computers are fast, and the can do lots of things at once!
-
----
-
-Requires Python 3.7+. Dependency management handled by [Poetry](https://github.com/sdispater/poetry).
+> If you wish to use `afl-gcc` instead, you may do so with `make CC=afl-gcc run`.
 
 ```
-python3 -m degreepath --help
+$ <install nuitka>
+$ <install afl>
+$ python3 install -r requirements.txt
+$ make run
 ```
+
+Change around the .YAML example file, which is my student data and the Asian Studies major, and have fun!
 
 ```
 Copyright (C) 2019  Hawken MacKay Rives
