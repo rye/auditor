@@ -99,6 +99,7 @@ class RequirementRule(Rule, BaseRequirementRule):
         return estimate
 
     def has_potential(self, *, ctx: 'RequirementContext') -> bool:
+        return True
         if self._has_potential(ctx=ctx):
             logger.debug('%s has potential: yes', self.path)
             return True

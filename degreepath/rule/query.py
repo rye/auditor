@@ -192,6 +192,7 @@ class QueryRule(Rule, BaseQueryRule):
         return iterations
 
     def has_potential(self, *, ctx: 'RequirementContext') -> bool:
+        return True
         if self._has_potential(ctx=ctx):
             logger.debug('%s has potential: yes', self.path)
             return True

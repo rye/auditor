@@ -29,8 +29,10 @@ def test_pruning_on_count_rule(caplog):
     assert [
         [x.course for x in s.solution.items if isinstance(x, CourseSolution)]
         for s in solutions
-    ] == [['DEPT 123'], ['DEPT 234'], ['DEPT 123', 'DEPT 234']]
-    assert len(solutions) == 3
+    ] == [['DEPT 123'], ['DEPT 234'], ['DEPT 345'], ['DEPT 123', 'DEPT 234'], ['DEPT 123', 'DEPT 345'], ['DEPT 234', 'DEPT 345'], ['DEPT 123', 'DEPT 234', 'DEPT 345']]
+    assert len(solutions) == 7
+    # ] == [['DEPT 123'], ['DEPT 234'], ['DEPT 123', 'DEPT 234']]
+    # assert len(solutions) == 3
 
     result = solutions[0].audit()
 
